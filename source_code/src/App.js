@@ -1,0 +1,27 @@
+import './App.css';
+import { BrowserRouter, Routes,Route } from 'react-router-dom';
+import Login from './components/Login/Login';
+import { CreateProductPage, HomePage } from './routes';
+import ProductDetailsPage from './pages/ProductDetailsPage';
+import CartProductPage from './pages/CartProductPage';
+import OrderProduct from './components/OrderProduct/OrderProduct';
+import Signup from './components/Signup/Signup';
+
+function App() {
+  return (
+   <BrowserRouter>
+      <Routes>
+        {/* <Route path='/login' element={<Signup/>}/> */}
+        <Route path='/sign-up' element={<Signup/>}/>
+        <Route path='/' element={<HomePage/>}/>
+        <Route path='/details' element={<ProductDetailsPage/>}/>
+        <Route path='/cart'element={<CartProductPage/>}/>
+        <Route path='/order'element={<OrderProduct/>}/>
+        <Route path="/sign-in" element={<Login/>}></Route>
+        <Route path='/admin/create' element={<CreateProductPage/>}/>
+      </Routes>
+   </BrowserRouter>
+  );
+}
+
+export default App;

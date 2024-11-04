@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+* {
+  margin: 0px;
+  padding: 0px;
+}
+
+@import url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap");
+
+@import url("https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css");
+@import url("https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css");
+
+body {
+  font-family: "Lato", sans-serif;
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.8);
+  overflow-x: hidden;
+}
+button {
+  text-transform: capitalize !important;
+}
+
+.bg-pink {
+  background: #dd6293;
+}
+
+@media (min-width: 1300px) {
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm,
+  .container-xl {
+    max-width: 1200px;
+  }
+}
+.homeBannerSection {
+  position: relative;
+}
+.homeBannerSection .swiper {
+  overflow: inherit !important;
+}
+.homeBannerSection .swiper .item {
+  overflow: hidden;
+  border-radius: 10px;
+}
+.homeBannerSection * {
+  outline: none !important;
+}
+.homeBannerSection .swiper-button-next,
+.homeBannerSection .swiper-button-prev {
+  position: absolute;
+  top: 45%;
+  z-index: 100;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  width: 35px !important;
+  height: 35px !important;
+  background-color: #fff;
+  border-radius: 100%;
+  font-family: FontAwesome !important;
+  font-weight: bold;
+  box-shadow: 0 1px 3px rgb(0 0 0 /12%), 0 1px 2px rgb(0 0 0 / 24%) !important;
+}
+.homeBannerSection {
+  cursor: pointer;
+}
+.swiper-button-next::after {
+  font-size: 12px !important;
+  color: #000;
+}
+.swiper-button-prev::after {
+  font-size: 12px !important;
+  color: #000;
+}
+.homeBannerSection .item {
+  height: 600px;
+}
+
+.homeBannerSection .item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Giúp ảnh lấp đầy khung mà không bị biến dạng */
+}
+.homeBannerSection {
+  position: relative;
+  width: 100vw; /* Force the banner to span the full viewport width */
+  max-height: 500px; /* Set a consistent height */
+  overflow: hidden;
+  margin: 0 auto; /* Center the content */
+}
+
+.item {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.homeBannerSection .item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
