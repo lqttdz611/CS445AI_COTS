@@ -6,6 +6,8 @@ import ProductDetailsPage from './pages/ProductDetailsPage';
 import CartProductPage from './pages/CartProductPage';
 import OrderProduct from './components/OrderProduct/OrderProduct';
 import Signup from './components/Signup/Signup';
+import CardDetails from './components/ProductDetails/CardDetails';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
   return (
@@ -14,7 +16,8 @@ function App() {
         {/* <Route path='/login' element={<Signup/>}/> */}
         <Route path='/sign-up' element={<Signup/>}/>
         <Route path='/' element={<HomePage/>}/>
-        <Route path='/details' element={<ProductDetailsPage/>}/>
+        {/* <Route path='/details' element={<ProductDetailsPage/>}/> */}
+        <Route path='/details' element={<CardDetails/>}/>
         <Route path='/cart'element={<CartProductPage/>}/>
         <Route path='/order'element={<OrderProduct/>}/>
         <Route path="/sign-in" element={<Login/>}></Route>

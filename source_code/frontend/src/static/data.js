@@ -2,14 +2,28 @@ export const navItems = [
   {
     title: "MENS",
     url: "/best-selling",
+    submenu: [
+      { title: "Luxury Watches", url: "/mens/luxury-watches" },
+      { title: "Sport Watches", url: "/mens/sport-watches" },
+      { title: "Casual Watches", url: "/mens/casual-watches" },
+    ],
   },
   {
     title: "WOMENS",
     url: "/products",
+    submenu: [
+      { title: "Fashion Watches", url: "/womens/fashion-watches" },
+      { title: "Luxury Watches", url: "/womens/luxury-watches" },
+      { title: "Casual Watches", url: "/womens/casual-watches" },
+    ],
   },
   {
     title: "COUPLE",
     url: "/events",
+    submenu: [
+      { title: "Matching Sets", url: "/couple/matching-sets" },
+      { title: "Engraved Watches", url: "/couple/engraved-watches" },
+    ],
   },
   {
     title: "WALL CLOCK",
@@ -18,13 +32,17 @@ export const navItems = [
   {
     title: "SMART WATCH",
     url: "/faq",
+    submenu: [
+      { title: "Apple Watch", url: "/smart-watch/apple" },
+      { title: "Samsung Galaxy Watch", url: "/smart-watch/samsung" },
+      { title: "Fitness Trackers", url: "/smart-watch/fitness" },
+    ],
   },
   {
     title: "NEWS",
     url: "/faq",
   },
 ];
-
 
 //chart
 export const chartProduct = {
