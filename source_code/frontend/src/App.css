@@ -233,3 +233,9 @@ h4.item-price.me-1 {
   flex: 1 1 auto;
   padding: 1.5rem 1.5rem;
 }
+.productItem .imgWrapper .img-container {
+  display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 250px;
+}
