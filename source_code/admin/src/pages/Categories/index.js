@@ -16,7 +16,6 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Pagination from "@mui/material/Pagination";
 
 import { deleteData, editData, fetchDataFromAPI } from "../../utils/api";
-import toast, { Toaster } from 'react-hot-toast';
 
 const StyledBreadcrumb = styled(Chip)(({ theme }) => {
   const backgroundColor =
@@ -57,7 +56,7 @@ const Categories = () => {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [editId, setEditId] = useState(null);
-  
+
   // change input in form (edit category)
   const [formFields, setFormFields] = useState({
     name: "",
@@ -109,19 +108,13 @@ const Categories = () => {
     setIsLoading(true);
 
     try {
-      const updatedCategory = await editData(`/api/category/${editId}`, formFields);
-      
-      setCateData(prevData => {
-        return prevData.map(category => 
-          category._id === editId ? updatedCategory : category
-        );
-      });
-
+      await editData(`/api/category/${editId}`, formFields);
+      const newData = await fetchDataFromAPI("/api/category");
+      setCateData(newData);
       setOpen(false);
-      setFormFields({}); // Reset form fields if needed
-
     } catch (error) {
       console.error("Error updating category:", error);
+      // Optionally show error to user
     } finally {
       setIsLoading(false);
     }
@@ -141,7 +134,6 @@ const Categories = () => {
 
   return (
     <>
-      <Toaster position="top-right" />
       <div className="right-content w-100">
         <div className="card shadow bordoer-0 w-100 flex-row p-4">
           <h5 className="mb-0">Category List</h5>
