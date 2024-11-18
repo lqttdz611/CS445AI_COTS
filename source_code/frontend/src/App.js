@@ -8,6 +8,7 @@ import OrderProduct from './components/OrderProduct/OrderProduct';
 import Signup from './components/Signup/Signup';
 import CardDetails from './components/ProductDetails/CardDetails';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import MensWatches from './pages/Mens';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path='/order'element={<OrderProduct/>}/>
         <Route path="/sign-in" element={<Login/>}></Route>
         <Route path='/admin/create' element={<CreateProductPage/>}/>
+        <Route path='/mens' element={<MensWatches/>}/>
       </Routes>
    </BrowserRouter>
   );
