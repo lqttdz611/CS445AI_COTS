@@ -1,25 +1,28 @@
+import { FcMultipleInputs } from "react-icons/fc";
 import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { RiDashboardHorizontalFill } from "react-icons/ri";
 import { Button } from "@mui/material";
 import { FaProductHunt } from "react-icons/fa6";
 import { IoIosArrowForward } from "react-icons/io";
-import { FaCartArrowDown } from "react-icons/fa";
-import { TbMessageCircleBolt } from "react-icons/tb";
-import { MdNotificationsActive } from "react-icons/md";
 import { IoSettingsSharp } from "react-icons/io5";
-import { FaUserEdit } from "react-icons/fa";import { IoLogOutOutline } from "react-icons/io5";
+import { FaUserEdit } from "react-icons/fa";
+import { IoLogOutOutline } from "react-icons/io5";
 import { MyContext } from "../../App";
 const SideBar = () => {
   const [isActive, setIsActive] = useState(null);
-  const [showProduct, setShowProduct] = useState(true)
+  const [showProduct, setShowProduct] = useState(true);
+  const [showCategory, setShowCategory] = useState(true);
 
   const context = useContext(MyContext);
   const handleActive = (index) => {
     setIsActive(index);
-  }
+  };
   const handleProduct = () => {
     setShowProduct(!showProduct);
+  };
+  const handleCategory = () => {
+    setShowCategory(!showCategory);
   };
   return (
     <>
@@ -27,7 +30,10 @@ const SideBar = () => {
         <ul>
           <li>
             <Link to={"/"}>
-              <Button className={isActive === 0 ? "w-100 active" : "w-100"} onClick={()=> handleActive(0)}>
+              <Button
+                className={isActive === 0 ? "w-100 active" : "w-100"}
+                onClick={() => handleActive(0)}
+              >
                 <span className="icon">
                   <RiDashboardHorizontalFill />
                 </span>
@@ -38,8 +44,14 @@ const SideBar = () => {
 
           <li>
             <Link to={"/"}>
-              <Button className={`w-100 ${showProduct ? 'active' : ''}`} onClick={() => {handleProduct(); setIsActive(1)}}>
-              {/* <Button className={isActive === 1 ? "w-100 active" : "w-100"} onClick={()=>{ handleActive(1);}} > */}
+              <Button
+                className={`w-100 ${showProduct ? "active" : ""}`}
+                onClick={() => {
+                  handleProduct();
+                  setIsActive(1);
+                }}
+              >
+                {/* <Button className={isActive === 1 ? "w-100 active" : "w-100"} onClick={()=>{ handleActive(1);}} > */}
                 <span className="icon">
                   <FaProductHunt />
                 </span>
@@ -49,8 +61,12 @@ const SideBar = () => {
                 </span>
               </Button>
             </Link>
-            <div className={`submenuWrapper ${showProduct ? 'colapse' : 'colapsed'}`}>
-            {/* <div className={isActive === 1 ? "submenuWrapper colapse" : "submenuWrapper colapsed"}> */}
+            <div
+              className={`submenuWrapper ${
+                showProduct ? "colapse" : "colapsed"
+              }`}
+            >
+              {/* <div className={isActive === 1 ? "submenuWrapper colapse" : "submenuWrapper colapsed"}> */}
               <ul class="submenu">
                 <li>
                   <a href="/products">Product List</a>
@@ -67,49 +83,47 @@ const SideBar = () => {
 
           <li>
             <Link to={"/"}>
-              <Button className={isActive === 2 ? "w-100 active" : "w-100"} onClick={()=> handleActive(2)}>
+              <Button
+                className={`w-100 ${showCategory ? "active" : ""}`}
+                onClick={() => {
+                  handleCategory();
+                  setIsActive(1);
+                }}
+              >
+                {/* <Button className={isActive === 1 ? "w-100 active" : "w-100"} onClick={()=>{ handleActive(1);}} > */}
                 <span className="icon">
-                  <FaCartArrowDown />
+                  <FcMultipleInputs />
                 </span>
-                &nbsp;Orders
+                &nbsp;Category
                 <span className="arrow">
                   <IoIosArrowForward />
                 </span>
               </Button>
             </Link>
+            <div
+              className={`submenuWrapper ${
+                showCategory ? "colapse" : "colapsed"
+              }`}
+            >
+              {/* <div className={isActive === 1 ? "submenuWrapper colapse" : "submenuWrapper colapsed"}> */}
+              <ul class="submenu">
+                <li>
+                  <a href="/categories">Category List</a>
+                </li>
+
+                <li>
+                  <a href="/categories/upload">Category Upload</a>
+                </li>
+              </ul>
+            </div>
           </li>
 
           <li>
             <Link to={"/"}>
-              <Button className={isActive === 3 ? "w-100 active" : "w-100"} onClick={()=> handleActive(3)}>
-                <span className="icon">
-                  <TbMessageCircleBolt />
-                </span>
-                &nbsp;Messages
-                <span className="arrow">
-                  <IoIosArrowForward />
-                </span>
-              </Button>
-            </Link>
-          </li>
-
-          <li>
-            <Link to={"/"}>
-              <Button className={isActive === 4 ? "w-100 active" : "w-100"} onClick={()=> handleActive(4)}>
-                <span className="icon">
-                  <MdNotificationsActive />
-                </span>
-                &nbsp;Notifications
-                <span className="arrow">
-                  <IoIosArrowForward />
-                </span>
-              </Button>
-            </Link>
-          </li>
-
-          <li>
-            <Link to={"/"}>
-              <Button className={isActive === 5 ? "w-100 active" : "w-100"} onClick={()=> handleActive(5)}>
+              <Button
+                className={isActive === 2 ? "w-100 active" : "w-100"}
+                onClick={() => handleActive(2)}
+              >
                 <span className="icon">
                   <IoSettingsSharp />
                 </span>
@@ -123,7 +137,10 @@ const SideBar = () => {
 
           <li>
             <Link to={"/"}>
-              <Button className={isActive === 6 ? "w-100 active" : "w-100"} onClick={()=> handleActive(6)}>
+              <Button
+                className={isActive === 3 ? "w-100 active" : "w-100"}
+                onClick={() => handleActive(3)}
+              >
                 <span className="icon">
                   <FaUserEdit />
                 </span>
@@ -132,12 +149,16 @@ const SideBar = () => {
             </Link>
           </li>
         </ul>
-        <br/>
+        <br />
 
         <div className="logoutWrapper">
           <div className="logoutBox">
-            <Link to='/login'>
-            <Button variant="contained"><IoLogOutOutline />LOGOUT</Button></Link>
+            <Link to="/login">
+              <Button variant="contained">
+                <IoLogOutOutline />
+                LOGOUT
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
