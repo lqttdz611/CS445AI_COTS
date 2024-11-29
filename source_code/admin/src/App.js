@@ -12,13 +12,58 @@ import Products from "./pages/Products";
 import ProductUpload from "./pages/ProductUpload";
 import CategoryUpload from "./pages/CategoryUpload";
 import Categories from "./pages/Categories";
+import LoadingBar from "react-top-loading-bar";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
+import { SnackbarProvider, useSnackbar } from "notistack";
+import { fetchDataFromAPI } from "./utils/api";
 
+// import EditProduct from "./pages/Products/editProduct";
+import CategoryEdit from "./pages/Categories/editCategory";
 const MyContext = createContext();
 function App() {
+  // for notification bottom left corner
+  const { enqueueSnackbar } = useSnackbar();
+  const [cateData, setCateData] = useState([]);
+  const [progress, setProgress] = useState(0);
+  const [alertBox, setAlertBox] = useState({
+    msg: "",
+    error: false,
+    open: false,
+  });
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setAlertBox({
+      open: false,
+    });
+  };
+
+  useEffect(() => {
+    setProgress(20);
+    fetchCategory();
+  }, []);
+  const fetchCategory = () => {
+    fetchDataFromAPI("/api/category").then((res) => {
+      setCateData(res);
+      setProgress(100);
+    });
+  };
+  const [isOpenNav, setIsOpenNav] = useState(false);
+  const openNav = () => {
+    setIsOpenNav(true);
+  };
+  const handleClickVariant = (variant) => () => {
+    // variant could be success, error, warning, info, or default
+    enqueueSnackbar("This is a success message!", { variant });
+  };
   const [isToggleSidebar, setIsToggleSidebar] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [isHideSidebar, setIsHideSidebar] = useState(false);
-  const [themeMode, setThemeMode] = useState(()=>{
+  const [baseUrl, setBaseUrl] = useState("http://localhost:4000");
+  const [themeMode, setThemeMode] = useState(() => {
     return localStorage.getItem("themeMode") === "dark" ? false : true;
   });
 
@@ -43,6 +88,13 @@ function App() {
     setIsHideSidebar,
     themeMode,
     setThemeMode,
+    handleClickVariant,
+    alertBox,
+    setAlertBox,
+    setProgress,
+    cateData,
+    baseUrl,
+    fetchCategory,
   };
 
   useEffect(() => {}, []);
@@ -50,6 +102,29 @@ function App() {
     <>
       <BrowserRouter>
         <MyContext.Provider value={values}>
+          <LoadingBar
+            color="#f11946"
+            progress={progress}
+            onLoaderFinished={() => setProgress(0)}
+            className="topLoadingBar"
+          />
+
+          <Snackbar
+            open={alertBox.open}
+            autoHideDuration={6000}
+            onClose={handleClose}
+          >
+            <Alert
+              onClose={handleClose}
+              autoHideDuration={6000}
+              severity={alertBox.error === false ? "success" : "error"}
+              variant="filled"
+              sx={{ width: "100%" }}
+            >
+              {alertBox.msg}
+            </Alert>
+          </Snackbar>
+
           {isHideSidebar !== true && <Header />}
 
           <div className="main d-flex">
@@ -78,14 +153,42 @@ function App() {
                 <Route path={"/login"} exact={true} element={<Login />} />
                 <Route path={"/sign-up"} exact={true} element={<SignUp />} />
                 <Route path={"/products"} exact={true} element={<Products />} />
-                <Route path={"/product/upload"} exact={true} element={<ProductUpload />} />
-                <Route path={"/categories/upload"} exact={true} element={<CategoryUpload />} />
-                <Route path={"/categories"} exact={true} element={<Categories />} />
+                <Route
+                  path={"/product/upload"}
+                  exact={true}
+                  element={<ProductUpload />}
+                />
+                <Route
+                  path={"/category/upload"}
+                  exact={true}
+                  element={<CategoryUpload />}
+                />
+                <Route
+                  path={"/categories"}
+                  exact={true}
+                  element={<Categories />}
+                />
+                <Route
+                  path={"/categories"}
+                  exact={true}
+                  element={<Categories />}
+                />
                 <Route
                   path={"/product/details"}
                   exact={true}
                   element={<ProductDetails />}
                 />
+                <Route
+                  path={"/categories/edit/:id"}
+                  exact={true}
+                  element={<CategoryEdit />}
+                />
+
+                {/* <Route
+                  path={"/product/edit/:id"}
+                  exact={true}
+                  element={<EditProduct />}
+                /> */}
               </Routes>
             </div>
           </div>
