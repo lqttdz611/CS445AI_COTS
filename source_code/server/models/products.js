@@ -21,6 +21,10 @@ const productSchema = mongoose.Schema({
     type: Number,
     default: 0,
   },
+  oldPrice: {
+    type:Number,
+    default: 0,
+  },
   category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Category",
@@ -33,11 +37,7 @@ const productSchema = mongoose.Schema({
     type: Number,
     default: 0,
   },
-  numReviews: {
-    type: Number,
-    default: 0,
-  },
-  featured: {
+  isFeatured: {
     type: Boolean,
     default: false,
   },
@@ -45,5 +45,7 @@ const productSchema = mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+},{
+  timestamps: true,
 });
 exports.Product = mongoose.model("Product", productSchema);

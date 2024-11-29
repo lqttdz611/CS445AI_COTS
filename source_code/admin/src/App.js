@@ -20,6 +20,7 @@ import { fetchDataFromAPI } from "./utils/api";
 
 // import EditProduct from "./pages/Products/editProduct";
 import CategoryEdit from "./pages/Categories/editCategory";
+import EditProduct from "./pages/Products/editProduct";
 const MyContext = createContext();
 function App() {
   // for notification bottom left corner
@@ -62,7 +63,7 @@ function App() {
   const [isToggleSidebar, setIsToggleSidebar] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [isHideSidebar, setIsHideSidebar] = useState(false);
-  const [baseUrl, setBaseUrl] = useState("http://localhost:4000");
+  const [baseUrl, setBaseUrl] = useState("http://localhost:5000");
   const [themeMode, setThemeMode] = useState(() => {
     return localStorage.getItem("themeMode") === "dark" ? false : true;
   });
@@ -182,6 +183,11 @@ function App() {
                   path={"/categories/edit/:id"}
                   exact={true}
                   element={<CategoryEdit />}
+                />
+                <Route
+                  path={"/product/edit/:id"}
+                  exact={true}
+                  element={<EditProduct />}
                 />
 
                 {/* <Route

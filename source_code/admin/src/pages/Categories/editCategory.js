@@ -137,7 +137,7 @@ const CategoryEdit = () => {
   const [formFields, setFormFields] = useState({
     name: "",
     images: [],
-    color: "",
+    description: "",
   });
 
   useEffect(() => {
@@ -148,7 +148,7 @@ const CategoryEdit = () => {
       setCategory(res);
       setFormFields({
         name: res.name,
-        color: res.color,
+        description: res.description,
       });
       setPreviews(res.images);
       context.setProgress(100);
@@ -159,10 +159,10 @@ const CategoryEdit = () => {
   const editCategory = (e) => {
     e.preventDefault();
     formdata.append("name", formFields.name);
-    formdata.append("color", formFields.color);
+    formdata.append("description", formFields.description);
 
     console.log(formFields);
-    if (formFields.name !== "" && formFields.color !== "") {
+    if (formFields.name !== "" && formFields.description !== "") {
       setIsLoading(true);
       editData(`/api/category/${id}`, formFields).then((res) => {
         setIsLoading(false);
@@ -170,8 +170,6 @@ const CategoryEdit = () => {
         console.log("siuu");
       });
     } else {
-      // setMessageNoti("Please fill all fields...!");
-
       context.setAlertBox({
         msg: "Please fill all the details",
         color: "success",
@@ -179,10 +177,6 @@ const CategoryEdit = () => {
       });
       return false;
     }
-
-    // fetchDataFromAPI("/api/category").then(res => {
-    //   console.log(res)
-    // })
   };
 
   const changeInput = (e) => {
@@ -193,22 +187,6 @@ const CategoryEdit = () => {
     }));
   };
 
-  // const removeImg = async (index, imgUrl) => {
-  //   const imgIndex = previews.indexOf(imgUrl);
-
-  //   deleteImages(`/api/category/deleteImage?img=${imgUrl}`).then((res) => {
-  //     context.setAlertBox({
-  //       open: true,
-  //       error: false,
-  //       msg: "Image Deleted!",
-  //     });
-  //   });
-
-  //   if (imgIndex > -1) {
-  //     // only splice array when item is found
-  //     previews.splice(index, 1); // 2nd parameter means remove one item only
-  //   }
-  // };
   return (
     <>
       <SnackbarProvider maxSnack={3}>
@@ -255,11 +233,11 @@ const CategoryEdit = () => {
                   </div>
 
                   <div class="form-group">
-                    <h6>CATEGORY COLOR</h6>
+                    <h6>CATEGORY DESCRIPTION</h6>
                     <input
                       type="text"
-                      name="color"
-                      value={formFields.color}
+                      name="description"
+                      value={formFields.description}
                       onChange={changeInput}
                     />
                   </div>

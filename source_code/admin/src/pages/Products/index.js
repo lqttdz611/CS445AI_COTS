@@ -19,6 +19,11 @@ import Rating from "@mui/material/Rating";
 import { Link } from "react-router-dom";
 import FormControl from "@mui/material/FormControl";
 import { MyContext } from "../../App";
+import {
+  deleteData,
+  fetchAllDataFromAPI,
+  fetchDataFromAPI,
+} from "../../utils/api";
 
 const StyledBreadcrumb = styled(Chip)(({ theme }) => {
   const backgroundColor =
@@ -41,10 +46,19 @@ const StyledBreadcrumb = styled(Chip)(({ theme }) => {
 });
 
 const Products = () => {
+  const [productData, setProductData] = useState([]);
   const context = useContext(MyContext);
+  // const [productList, setProductList] = useState([]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
 
- 
-
+    context.setProgress(40);
+    fetchAllDataFromAPI("/api/products").then((res) => {
+      setProductData(res);
+      context.setProgress(100);
+    });
+    // console.log(productData)
+  }, []);
 
   const [age, setAge] = React.useState("");
   const [category, setCategory] = useState("");
@@ -54,6 +68,38 @@ const Products = () => {
   const handleCateChange = (event: SelectChangeEvent) => {
     setCategory(event.target.value);
   };
+
+  // for pagination part
+  const [page, setPage] = useState(1);
+
+  const handleChangePagination = (event, value) => {
+    setPage(value);
+    fetchDataFromAPI(`/api/products/?page=${value}`).then((res) => {
+      if (res?.productList) {
+        setProductData(res);
+        console.log(res);
+      } else {
+        console.log("No data to show");
+      }
+    });
+  };
+
+  const deleteProduct = (id) => {
+    context.setProgress(40)
+    deleteData(`/api/products/${id}`).then((res) => {
+      context.setProgress(100);
+        context.setAlertBox({
+          open: true,
+          error: false,
+          msg: "Product Deleted!",
+        });
+      fetchDataFromAPI("/api/products").then((res) => {
+        setProductData(res);
+      });
+    });
+  };
+  
+
   return (
     <>
       <div className="right-content w-100">
@@ -207,520 +253,88 @@ const Products = () => {
               </thead>
 
               <tbody>
-                <tr>
-                  <td>#1</td>
-                  <td>
-                    <div className="d-flex align-items-center productBox">
-                      <div className="imgWrapper">
-                        <div className="img card shadow m-0">
-                          <img
-                            src="https://mironcoder-hotash.netlify.app/images/product/01.webp"
-                            alt="product test"
-                            className="w-100"
-                          ></img>
-                        </div>
-                      </div>
+                {productData?.productList?.length !== 0 &&
+                  productData?.productList?.map((item, index) => {
+                    return (
+                      <tr>
+                        <td>#{index + 1}</td>
+                        <td>
+                          <div className="d-flex align-items-center productBox">
+                            <div className="imgWrapper">
+                              <div className="img card shadow m-0">
+                                <img
+                                  src={`http://localhost:5000/uploads/productsUploaded/${item.images[0]}`}
+                                  alt="product test"
+                                  className="w-100"
+                                ></img>
+                              </div>
+                            </div>
 
-                      <div className="info pl-3">
-                        <h6>Tops and skirt set for Female...</h6>
-                        <p>
-                          Women's exclusive summer Tops and skirt set for Female
-                          Tops and skirt set
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td>Womans </td>
-                  <td>Richman</td>
-                  <td style={{ width: "70px" }}>
-                    <del class="old">$21.00</del>
-                    <span class="new text-danger">$21.00</span>
-                  </td>
-                  <td>
-                    <Rating name="read-only" size="small" value={4} readOnly />
-                  </td>
-                  <td>4.9(16)</td>
-                  <td>380</td>
-                  <td>$38k</td>
-                  <td>
-                    <div className="actions d-flex align-items-center">
-                      <Link to="/product/details">
-                        <Button className="view ">
-                          <FaEye />
-                        </Button>
-                      </Link>
-                      <Button className="edit ">
-                        <FaEdit />
-                      </Button>
-                      <Button className="delete">
-                        <MdDeleteForever />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
+                            <div className="info pl-3">
+                              <h6>{item.description}</h6>
+                              <p>
+                                Women's exclusive summer Tops and skirt set for
+                                Female Tops and skirt set
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        <td>{item.category.name} </td>
+                        <td>{item.brand}</td>
+                        <td style={{ width: "70px" }}>
+                          <del class="old">${item.price}</del>
+                          <span class="new text-danger">${item.oldPrice}</span>
+                        </td>
+                        <td>
+                          <Rating
+                            name="read-only"
+                            size="small"
+                            value={item.rating}
+                            readOnly
+                          />
+                        </td>
+                        <td>4.9(16)</td>
+                        <td>380</td>
+                        <td>$38k</td>
+                        <td>
+                          <div className="actions d-flex align-items-center">
+                            <Link to="/product/details">
+                              <Button className="view ">
+                                <FaEye />
+                              </Button>
+                            </Link>
 
-                <tr>
-                  <td>#2</td>
-                  <td>
-                    <div className="d-flex align-items-center productBox">
-                      <div className="imgWrapper">
-                        <div className="img card shadow m-0">
-                          <img
-                            src="https://mironcoder-hotash.netlify.app/images/product/01.webp"
-                            alt="product test"
-                            className="w-100"
-                          ></img>
-                        </div>
-                      </div>
-
-                      <div className="info pl-3">
-                        <h6>Tops and skirt set for Female...</h6>
-                        <p>
-                          Women's exclusive summer Tops and skirt set for Female
-                          Tops and skirt set
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td>Womans </td>
-                  <td>Richman</td>
-                  <td style={{ width: "70px" }}>
-                    <del class="old">$21.00</del>
-                    <span class="new text-danger">$21.00</span>
-                  </td>
-                  <td>
-                    <Rating name="read-only" size="small" value={4} readOnly />
-                  </td>
-                  <td>4.9(16)</td>
-                  <td>380</td>
-                  <td>$38k</td>
-                  <td>
-                    <div className="actions d-flex align-items-center">
-                      <Button className="view ">
-                        <FaEye />
-                      </Button>
-                      <Button className="edit ">
-                        <FaEdit />
-                      </Button>
-                      <Button className="delete">
-                        <MdDeleteForever />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td>#3</td>
-                  <td>
-                    <div className="d-flex align-items-center productBox">
-                      <div className="imgWrapper">
-                        <div className="img card shadow m-0">
-                          <img
-                            src="https://mironcoder-hotash.netlify.app/images/product/01.webp"
-                            alt="product test"
-                            className="w-100"
-                          ></img>
-                        </div>
-                      </div>
-
-                      <div className="info pl-3">
-                        <h6>Tops and skirt set for Female...</h6>
-                        <p>
-                          Women's exclusive summer Tops and skirt set for Female
-                          Tops and skirt set
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td>Womans </td>
-                  <td>Richman</td>
-                  <td style={{ width: "70px" }}>
-                    <del class="old">$21.00</del>
-                    <span class="new text-danger">$21.00</span>
-                  </td>
-                  <td>
-                    <Rating name="read-only" size="small" value={4} readOnly />
-                  </td>
-                  <td>4.9(16)</td>
-                  <td>380</td>
-                  <td>$38k</td>
-                  <td>
-                    <div className="actions d-flex align-items-center">
-                      <Button className="view ">
-                        <FaEye />
-                      </Button>
-                      <Button className="edit ">
-                        <FaEdit />
-                      </Button>
-                      <Button className="delete">
-                        <MdDeleteForever />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td>#4</td>
-                  <td>
-                    <div className="d-flex align-items-center productBox">
-                      <div className="imgWrapper">
-                        <div className="img card shadow m-0">
-                          <img
-                            src="https://mironcoder-hotash.netlify.app/images/product/01.webp"
-                            alt="product test"
-                            className="w-100"
-                          ></img>
-                        </div>
-                      </div>
-
-                      <div className="info pl-3">
-                        <h6>Tops and skirt set for Female...</h6>
-                        <p>
-                          Women's exclusive summer Tops and skirt set for Female
-                          Tops and skirt set
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td>Womans </td>
-                  <td>Richman</td>
-                  <td style={{ width: "70px" }}>
-                    <del class="old">$21.00</del>
-                    <span class="new text-danger">$21.00</span>
-                  </td>
-                  <td>
-                    <Rating name="read-only" size="small" value={4} readOnly />
-                  </td>
-                  <td>4.9(16)</td>
-                  <td>380</td>
-                  <td>$38k</td>
-                  <td>
-                    <div className="actions d-flex align-items-center">
-                      <Button className="view ">
-                        <FaEye />
-                      </Button>
-                      <Button className="edit ">
-                        <FaEdit />
-                      </Button>
-                      <Button className="delete">
-                        <MdDeleteForever />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td>#5</td>
-                  <td>
-                    <div className="d-flex align-items-center productBox">
-                      <div className="imgWrapper">
-                        <div className="img card shadow m-0">
-                          <img
-                            src="https://mironcoder-hotash.netlify.app/images/product/01.webp"
-                            alt="product test"
-                            className="w-100"
-                          ></img>
-                        </div>
-                      </div>
-
-                      <div className="info pl-3">
-                        <h6>Tops and skirt set for Female...</h6>
-                        <p>
-                          Women's exclusive summer Tops and skirt set for Female
-                          Tops and skirt set
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td>Womans </td>
-                  <td>Richman</td>
-                  <td style={{ width: "70px" }}>
-                    <del class="old">$21.00</del>
-                    <span class="new text-danger">$21.00</span>
-                  </td>
-                  <td>
-                    <Rating name="read-only" size="small" value={4} readOnly />
-                  </td>
-                  <td>4.9(16)</td>
-                  <td>380</td>
-                  <td>$38k</td>
-                  <td>
-                    <div className="actions d-flex align-items-center">
-                      <Button className="view ">
-                        <FaEye />
-                      </Button>
-                      <Button className="edit ">
-                        <FaEdit />
-                      </Button>
-                      <Button className="delete">
-                        <MdDeleteForever />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td>#6</td>
-                  <td>
-                    <div className="d-flex align-items-center productBox">
-                      <div className="imgWrapper">
-                        <div className="img card shadow m-0">
-                          <img
-                            src="https://mironcoder-hotash.netlify.app/images/product/01.webp"
-                            alt="product test"
-                            className="w-100"
-                          ></img>
-                        </div>
-                      </div>
-
-                      <div className="info pl-3">
-                        <h6>Tops and skirt set for Female...</h6>
-                        <p>
-                          Women's exclusive summer Tops and skirt set for Female
-                          Tops and skirt set
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td>Womans </td>
-                  <td>Richman</td>
-                  <td style={{ width: "70px" }}>
-                    <del class="old">$21.00</del>
-                    <span class="new text-danger">$21.00</span>
-                  </td>
-                  <td>
-                    <Rating name="read-only" size="small" value={4} readOnly />
-                  </td>
-                  <td>4.9(16)</td>
-                  <td>380</td>
-                  <td>$38k</td>
-                  <td>
-                    <div className="actions d-flex align-items-center">
-                      <Button className="view ">
-                        <FaEye />
-                      </Button>
-                      <Button className="edit ">
-                        <FaEdit />
-                      </Button>
-                      <Button className="delete">
-                        <MdDeleteForever />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td>#7</td>
-                  <td>
-                    <div className="d-flex align-items-center productBox">
-                      <div className="imgWrapper">
-                        <div className="img card shadow m-0">
-                          <img
-                            src="https://mironcoder-hotash.netlify.app/images/product/01.webp"
-                            alt="product test"
-                            className="w-100"
-                          ></img>
-                        </div>
-                      </div>
-
-                      <div className="info pl-3">
-                        <h6>Tops and skirt set for Female...</h6>
-                        <p>
-                          Women's exclusive summer Tops and skirt set for Female
-                          Tops and skirt set
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td>Womans </td>
-                  <td>Richman</td>
-                  <td style={{ width: "70px" }}>
-                    <del class="old">$21.00</del>
-                    <span class="new text-danger">$21.00</span>
-                  </td>
-                  <td>
-                    <Rating name="read-only" size="small" value={4} readOnly />
-                  </td>
-                  <td>4.9(16)</td>
-                  <td>380</td>
-                  <td>$38k</td>
-                  <td>
-                    <div className="actions d-flex align-items-center">
-                      <Button className="view ">
-                        <FaEye />
-                      </Button>
-                      <Button className="edit ">
-                        <FaEdit />
-                      </Button>
-                      <Button className="delete">
-                        <MdDeleteForever />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td>#8</td>
-                  <td>
-                    <div className="d-flex align-items-center productBox">
-                      <div className="imgWrapper">
-                        <div className="img card shadow m-0">
-                          <img
-                            src="https://mironcoder-hotash.netlify.app/images/product/01.webp"
-                            alt="product test"
-                            className="w-100"
-                          ></img>
-                        </div>
-                      </div>
-
-                      <div className="info pl-3">
-                        <h6>Tops and skirt set for Female...</h6>
-                        <p>
-                          Women's exclusive summer Tops and skirt set for Female
-                          Tops and skirt set
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td>Womans </td>
-                  <td>Richman</td>
-                  <td style={{ width: "70px" }}>
-                    <del class="old">$21.00</del>
-                    <span class="new text-danger">$21.00</span>
-                  </td>
-                  <td>
-                    <Rating name="read-only" size="small" value={4} readOnly />
-                  </td>
-                  <td>4.9(16)</td>
-                  <td>380</td>
-                  <td>$38k</td>
-                  <td>
-                    <div className="actions d-flex align-items-center">
-                      <Button className="view ">
-                        <FaEye />
-                      </Button>
-                      <Button className="edit ">
-                        <FaEdit />
-                      </Button>
-                      <Button className="delete">
-                        <MdDeleteForever />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td>#9</td>
-                  <td>
-                    <div className="d-flex align-items-center productBox">
-                      <div className="imgWrapper">
-                        <div className="img card shadow m-0">
-                          <img
-                            src="https://mironcoder-hotash.netlify.app/images/product/01.webp"
-                            alt="product test"
-                            className="w-100"
-                          ></img>
-                        </div>
-                      </div>
-
-                      <div className="info pl-3">
-                        <h6>Tops and skirt set for Female...</h6>
-                        <p>
-                          Women's exclusive summer Tops and skirt set for Female
-                          Tops and skirt set
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td>Womans </td>
-                  <td>Richman</td>
-                  <td style={{ width: "70px" }}>
-                    <del class="old">$21.00</del>
-                    <span class="new text-danger">$21.00</span>
-                  </td>
-                  <td>
-                    <Rating name="read-only" size="small" value={4} readOnly />
-                  </td>
-                  <td>4.9(16)</td>
-                  <td>380</td>
-                  <td>$38k</td>
-                  <td>
-                    <div className="actions d-flex align-items-center">
-                      <Button className="view ">
-                        <FaEye />
-                      </Button>
-                      <Button className="edit ">
-                        <FaEdit />
-                      </Button>
-                      <Button className="delete">
-                        <MdDeleteForever />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td>#10</td>
-                  <td>
-                    <div className="d-flex align-items-center productBox">
-                      <div className="imgWrapper">
-                        <div className="img card shadow m-0">
-                          <img
-                            src="https://mironcoder-hotash.netlify.app/images/product/01.webp"
-                            alt="product test"
-                            className="w-100"
-                          ></img>
-                        </div>
-                      </div>
-
-                      <div className="info pl-3">
-                        <h6>Tops and skirt set for Female...</h6>
-                        <p>
-                          Women's exclusive summer Tops and skirt set for Female
-                          Tops and skirt set
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td>Womans </td>
-                  <td>Richman</td>
-                  <td style={{ width: "70px" }}>
-                    <del class="old">$21.00</del>
-                    <span class="new text-danger">$21.00</span>
-                  </td>
-                  <td>
-                    <Rating name="read-only" size="small" value={4} readOnly />
-                  </td>
-                  <td>4.9(16)</td>
-                  <td>380</td>
-                  <td>$38k</td>
-                  <td>
-                    <div className="actions d-flex align-items-center">
-                      <Button className="view ">
-                        <FaEye />
-                      </Button>
-                      <Button className="edit ">
-                        <FaEdit />
-                      </Button>
-                      <Button className="delete">
-                        <MdDeleteForever />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
+                            <Link to={`/product/edit/${item._id}`}>
+                            <Button className="edit ">
+                              <FaEdit />
+                            </Button>
+                            </Link>
+                            <Button
+                              className="delete"
+                              onClick={() => deleteProduct(item._id)}
+                            >
+                              <MdDeleteForever />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
 
             <div className="d-flex tableFooter">
-              <p>
-                Showing <b>10</b> of <b>60</b> results
-              </p>
+              {/* <p>
+                Showing <b>{page}</b> of <b>{cateData?.length}</b> results
+              </p> */}
 
               <Pagination
-                className="pagination "
-                count={10}
+                count={productData?.totalPages}
+                color="primary"
+                className="pagination"
                 showFirstButton
                 showLastButton
+                onChange={handleChangePagination}
               />
             </div>
           </div>

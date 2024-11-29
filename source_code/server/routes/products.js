@@ -3,9 +3,10 @@ const { Product } = require("../models/products");
 const express = require("express");
 const router = express.Router();
 const cloudinary = require("cloudinary").v2;
-const multer  = require('multer')
-const fs = require('fs')
-var imagesArray = []
+const multer = require("multer");
+const fs = require("fs");
+var imagesArray = [];
+var productEditId;
 // const storage = multer.diskStorage({
 //   destination: function (req, file, cb) {
 //     cb(null, 'uploads')
@@ -19,7 +20,7 @@ const path = require("path"); // Import path for handling file extensions
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads"); // Specify the destination folder
+    cb(null, "uploads/productsUploaded"); // Specify the destination folder
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
@@ -27,29 +28,96 @@ const storage = multer.diskStorage({
     cb(null, file.fieldname + "-" + uniqueSuffix + extension); // Append the extension
   },
 });
-const upload = multer({ storage: storage })
-router.post(`/upload`, upload.array("images"), async(req,res) => {
-  imagesArray= [];
-  const files= req.files;
+const upload = multer({ storage: storage });
+// router.post(`/upload`, upload.array("images"), async(req,res) => {
+//   imagesArray= [];
+//   const files= req.files;
 
-  for(let i=0; i<files.length; i++) {
+//   for(let i=0; i<files.length; i++) {
+//     imagesArray.push(files[i].filename);
+//   }
+
+//   console.log(imagesArray)
+
+//   res.json(imagesArray)
+// })
+router.post(`/upload`, upload.array("images"), async (req, res) => {
+  let images;
+  if (productEditId !== undefined) {
+    const product = await Product.findById(productEditId);
+
+    if (product) {
+      images = product.images;
+    }
+    if (!product) {
+      return res.status(404).json({
+        message: "Product not found",
+        success: false,
+      });
+    }
+
+    if (images.length !== 0) {
+      for (let image of images) {
+        fs.unlinkSync(`uploads/productsUploaded/${image}`);
+      }
+    }
+  }
+
+  imagesArray = [];
+  const files = req.files;
+
+  for (let i = 0; i < files.length; i++) {
     imagesArray.push(files[i].filename);
   }
 
-  console.log(imagesArray)
+  res.send(imagesArray);
+});
 
-  res.json(imagesArray)
-})
+// router.get("/", async (req, res) => {
+//   const productList = await Product.find().populate("category");
+
+//   if (!productList) {
+//     res.status(500).json({
+//       success: false,
+//     });
+//   }
+//   res.send(productList);
+// });
 
 router.get("/", async (req, res) => {
-  const productList = await Product.find().populate("category");
+  const page = parseInt(req.query.page) || 1;
+
+  const perPage = 5;
+
+  const totalPosts = await Product.countDocuments();
+
+  const totalPages = Math.ceil(totalPosts / perPage);
+
+  if (page > totalPages) {
+    return res.status(404).json({ message: "Page not found!" });
+  }
+
+  const productList = await Product.find()
+
+    .populate("category")
+
+    .skip((page - 1) * perPage)
+
+    .limit(perPage)
+
+    .exec();
 
   if (!productList) {
-    res.status(500).json({
-      success: false,
-    });
+    res.status(500).json({ success: false });
   }
-  res.send(productList);
+
+  return res.status(200).json({
+    productList: productList,
+
+    totalPages: totalPages,
+
+    page: page,
+  });
 });
 
 router.post("/create", async (req, res) => {
@@ -57,29 +125,6 @@ router.post("/create", async (req, res) => {
   if (!category) {
     return res.status(404).send("invalid Category!");
   }
-
-  // const pLimit = (await import("p-limit")).default;
-  // const limit = pLimit(2);
-
-  // const imagesToUpLoad = req.body.images.map((image) => {
-  //   return limit(async () => {
-  //     const result = await cloudinary.uploader.upload(image);
-  //     return result;
-  //   });
-  // });
-
-  // const uploadStatus = await Promise.all(imagesToUpLoad);
-
-  // const imgUrl = uploadStatus.map((item) => {
-  //   return item.secure_url;
-  // });
-
-  // if (!uploadStatus) {
-  //   return res.status(500).json({
-  //     err: "images cannot upload!",
-  //     status: "false",
-  //   });
-  // }
 
   let product = new Product({
     name: req.body.name,
@@ -92,6 +137,7 @@ router.post("/create", async (req, res) => {
     countInStock: req.body.countInStock,
     rating: req.body.rating,
     isFeatured: req.body.isFeatured,
+    dateCreated: new Date(),
   });
 
   product = await product.save();
@@ -106,6 +152,8 @@ router.post("/create", async (req, res) => {
 });
 
 router.get("/:id", async (req, res) => {
+  productEditId = req.params.id;
+
   const product = await Product.findById(req.params.id);
 
   if (!product) {
@@ -113,72 +161,58 @@ router.get("/:id", async (req, res) => {
       message: "The product with id given was not found!",
     });
   }
+
   res.status(200).send(product);
 });
 
-router.put("/:id", async (req, res) => {
+router.put('/:id', async (req, res) => {
+  try {
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      {
+        name: req.body.name,
+        description: req.body.description,
+        images: imagesArray, // Assuming images are provided directly in the request
+        brand: req.body.brand,
+        price: req.body.price,
+        category: req.body.category,
+        subCate: req.body.subCate,
+        countInStock: req.body.countInStock,
+        rating: req.body.rating,
+        numReviews: req.body.numReviews,
+        isFeatured: req.body.isFeatured,
+      },
+      { new: true }
+    );
 
-  const pLimit = (await import("p-limit")).default;
-  const limit = pLimit(2);
-
-  const imagesToUpLoad = req.body.images.map((image) => {
-    return limit(async () => {
-      const result = await cloudinary.uploader.upload(image);
-      return result;
-    });
-  });
-
-  const uploadStatus = await Promise.all(imagesToUpLoad);
-
-  const imgUrl = uploadStatus.map((item) => {
-    return item.secure_url;
-  });
-
-  if (!uploadStatus) {
-    return res.status(500).json({
-      err: "images cannot upload!",
-      status: "false",
-    });
-  }
-
- 
-
-  const product = await Product.findByIdAndUpdate(req.params.id,{
-    name: req.body.name,
-    description: req.body.description,
-    images: imagesArray,
-    brand: req.body.brand,
-    price: req.body.price,
-    category: req.body.category,
-    countInStock: req.body.countInStock,
-    rating: req.body.rating,
-    numReviews: req.body.numReviews,
-    isFeatured: req.body.isFeatured, },
-    {
-    new: true,
+    if (!product) {
+      return res.status(500).json({
+        message: 'The product cannot be updated!',
+        success: false,
+      });
     }
-  );
 
-  if (!product) {
-    res.status(404).json({
-      message: "the product can not be found!",
-      status: false,
+    res.status(200).json({
+      message: 'Product updated successfully',
+      success: true,
+      product,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'An error occurred while updating the product',
+      success: false,
+      error: error.message,
     });
   }
-
-  res.status(200).json({
-    message: "the product is updated!",
-    status: true,
-  });
 });
 
 router.delete("/:id", async (req, res) => {
   const product = await Product.findById(req.params.id);
   const images = product.images;
 
-  if (images.length!==0) {
-    for(image of images) {
-      fs.unlinkSync(`uploads/${image}`);
+  if (images.length !== 0) {
+    for (image of images) {
+      fs.unlinkSync(`uploads/productsUploaded/${image}`);
     }
   }
   const deleteProduct = await Product.findByIdAndDelete(req.params.id);
@@ -194,7 +228,6 @@ router.delete("/:id", async (req, res) => {
     status: true,
   });
 });
-
 
 // router.delete("/:id", async (req, res) => {
 //   try {

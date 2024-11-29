@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Breadcrumbs, Button } from "@mui/material";
 import { FaHome } from "react-icons/fa";
 import { MdExpandMore } from "react-icons/md";
@@ -14,7 +14,7 @@ import { FaCloudUploadAlt } from "react-icons/fa";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import Rating from "@mui/material/Rating";
 import {MyContext} from "../../App"
-import { deleteData, fetchAllDataFromAPI, fetchDataFromAPI, postData } from "../../utils/api";
+import { deleteData, editData, fetchAllDataFromAPI, fetchDataFromAPI, postData } from "../../utils/api";
 const StyledBreadcrumb = styled(Chip)(({ theme }) => {
   const backgroundColor =
     theme.palette.mode === "light"
@@ -35,15 +35,17 @@ const StyledBreadcrumb = styled(Chip)(({ theme }) => {
   };
 });
 
-const ProductUpload = () => {
+const EditProduct = () => {
   const history = useNavigate();
-
+  let { id } = useParams();
   const context = useContext(MyContext);
 
+  const [isLoading, setIsLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   // for rating controlled
-  const [valueRating, setValueRating] = useState(2);
-
+  const [valueRating, setValueRating] = useState("1");
+  const [product, setProducts] = useState([]);
+  const [categoryVal, setcategoryVal] = useState("");
   const [formFields, setFormFields] = useState({
     name: "",
     description: "",
@@ -57,37 +59,71 @@ const ProductUpload = () => {
     isFeatured: false,
   });
   const [cateData, setCateData] = useState([]);
-
+  const [isFeaturedValue, setisFeaturedValue] = useState("");
   useEffect(() => {
     window.scrollTo(0, 0);
+    context.setProgress(20);
 
-    fetchAllDataFromAPI("/api/category/all").then((res) => {
-      console.log(res);
+    fetchDataFromAPI(`/api/category`).then((res) => {
+      console.log(
+        "category", res
+      )
       setCateData(res);
+      context.setProgress(100)
+    })
+
+    fetchAllDataFromAPI(`/api/products/${id}`).then((res) => {
+      setProducts(res);
+      setFormFields({
+        name: res.name,
+        description: res.description,
+        brand: res.brand,
+        price: res.price,
+        oldPrice: res.oldPrice,
+        category: res.category,
+        countInStock: res.countInStock,
+        rating: res.rating,
+        isFeatured: res.isFeatured,
+        
+      });
+      setPreViewImg(res.images)
+      console.log(res);
+      setcategoryVal(res.category);
+      setValueRating(res.rating);
+      
+      setisFeaturedValue(res.featured);
+      context.setProgress(100);
     });
   }, []);
 
   //
   const [categoryItem, setCategoryItem] = useState("");
+  const [categorySubItem, setCategorySubItem] = useState("");
   const [featuredSelect, setFeaturedSelect] = useState("");
+  const [ramProduct, setRamProduct] = useState("");
   const handleChange = (event: SelectChangeEvent) => {
     setCategoryItem(event.target.value);
     setFormFields({
       ...formFields,
       category:event.target.value,
-      
     })
   };
-  const handleFeatureChange = (event: SelectChangeEvent) => {
-    setFeaturedSelect(event.target.value);
-    setFormFields({
+  const handleSubChange = (event: SelectChangeEvent) => {
+    setCategorySubItem(event.target.value);
+  };
+  const handleChangeisFeaturedValue = (event) => {
+    setisFeaturedValue(event.target.value);
+    setFormFields(() => ({
       ...formFields,
-      [event.target.name]:event.target.value,
-    })
+      isFeatured: event.target.value,
+    }));
+  };
+  const handleRamChange = (event: SelectChangeEvent) => {
+    setRamProduct(event.target.value);
   };
 
 
-  const addProduct = (e) => {
+  const editProduct = (e) => {
     e.preventDefault();
     // console.log(formFields);
 
@@ -96,10 +132,19 @@ const ProductUpload = () => {
     formdata.append("brand", formFields.brand);
     formdata.append("price", formFields.price);
     formdata.append("oldPrice", formFields.oldPrice);
+    // formdata.append("subCatId", formFields.subCatId);
+    // formdata.append("catId", formFields.catId);
+    // formdata.append("catName", formFields.catName);
     formdata.append("category", formFields.category);
+    // formdata.append("subCat", formFields.subCat);
     formdata.append("countInStock", formFields.countInStock);
     formdata.append("rating", formFields.rating);
     formdata.append("isFeatured", formFields.isFeatured);
+    // formdata.append("discount", formFields.discount);
+    // formdata.append("productRam", formFields.productRam);
+    // formdata.append("size", formFields.size);
+    // formdata.append("productWeight", formFields.productWeight);
+    // formdata.append("location", formFields.location);
 
     if (formFields.name === "") {
       // context.setAlertBox({
@@ -159,10 +204,15 @@ const ProductUpload = () => {
       alert("please select a category")
       return false;
     }
-    postData(`/api/products/create/`, formFields).then((res) => {
-      console.log(res);
-      alert("Upload success!!")
-      console.log("success");
+    editData(`/api/products/${id}`, formFields).then((res) => {
+      context.setAlertBox({
+        open:true,
+        msg:"The product was uploaded!",
+        error: false,
+
+      })
+      setIsLoading(false);
+      
       history("/products");
     })
   };
@@ -247,7 +297,7 @@ const ProductUpload = () => {
     <>
       <div className="right-content w-100">
         <div className="card shadow border-0 w-100 flex-row p-4">
-          <h5 className="mb-0">Product Upload</h5>
+          <h5 className="mb-0">Product Edit</h5>
           <Breadcrumbs aria-label="breadcrumb" className="ml-auto breadcrumbs_">
             <StyledBreadcrumb
               component="a"
@@ -262,45 +312,47 @@ const ProductUpload = () => {
               deleteIcon={<MdExpandMore />}
             />
             <StyledBreadcrumb
-              label="Product Upload"
+              label="Product Edit"
               deleteIcon={<MdExpandMore />}
             />
           </Breadcrumbs>
         </div>
 
-        <form className="form" onSubmit={addProduct}>
+        <form className="form" onSubmit={editProduct}>
           <div className="row">
             <div className="col-md-12">
               <div className="card p-4 mt-0">
-                <h5 className="mb-4">Basic Information</h5>
-                <div className="form-group">
+                <h5 class="mb-4">Basic Information</h5>
+                <div class="form-group">
                   <h6>PRODUCT NAME</h6>
-                  <input type="text" name="name" onChange={inputChange} />
+                  <input value={formFields.name} type="text" name="name" onChange={inputChange} />
                 </div>
 
-                <div className="form-group">
+                <div class="form-group">
                   <h6>DESCRIPTION</h6>
                   <textarea
+                    value={formFields.description}
                     rows="5"
                     name="description"
                     onChange={inputChange}
                     cols="10"
                   ></textarea>
-            
                 </div>
 
                 <div className="row">
                   <div className="col">
                     <div className="form-group">
                       <h6>CATEGORY</h6>
-                      <FormControl
+                      {
+                        categoryVal !== "" && (
+                          <FormControl
                         // size="small"
                         className="w-100"
                         sx={{ m: 0, minWidth: 120 }}
                       >
                         <Select
                           name="category"
-                          value={categoryItem}
+                          value={categoryVal}
                           onChange={handleChange}
                           displayEmpty
                           inputProps={{ "aria-label": "Without label" }}
@@ -308,8 +360,8 @@ const ProductUpload = () => {
                           <MenuItem value="">
                             <em>None</em>
                           </MenuItem>
-                          {cateData?.length !== 0 &&
-                            cateData?.map((cate, index) => {
+                          {cateData?.categoryList?.length !== 0 &&
+                            cateData?.categoryList?.map((cate, index) => {
                               return (
                                 <MenuItem
                                   className="text-capitalize"
@@ -321,13 +373,41 @@ const ProductUpload = () => {
                             })}
                         </Select>
                       </FormControl>
+                        )
+                      }
+                      
+                    </div>
+                  </div>
+
+                  <div className="col">
+                    <div className="form-group">
+                      <h6>SUB CATEGORY</h6>
+                      <FormControl
+                        // size="small"
+                        className="w-100"
+                        sx={{ m: 0, minWidth: 120 }}
+                      >
+                        <Select
+                          value={categorySubItem}
+                          onChange={handleSubChange}
+                          displayEmpty
+                          inputProps={{ "aria-label": "Without label" }}
+                        >
+                          <MenuItem value="">
+                            <em>None</em>
+                          </MenuItem>
+                          <MenuItem value={"JEANS"}>JEANS</MenuItem>
+                          <MenuItem value={"SHIRTS"}>SHIRTS</MenuItem>
+                          <MenuItem value={"BAGGY"}>BAGGY</MenuItem>
+                        </Select>
+                      </FormControl>
                     </div>
                   </div>
 
                   <div className="col">
                     <div className="form-group">
                       <h6>PRICE</h6>
-                      <input type="text" onChange={inputChange} name="price" />
+                      <input type="text" value={formFields.price} onChange={inputChange} name="price" />
                     </div>
                   </div>
                 </div>
@@ -336,14 +416,38 @@ const ProductUpload = () => {
                   <div className="col">
                     <div className="form-group">
                       <h6>OLD PRICE </h6>
-                      <input type="text" name="oldPrice" onChange={inputChange} />
+                      <input type="text" value={formFields.oldPrice} name="oldPrice" onChange={inputChange} />
                     </div>
                   </div>
-                  
+                  <div className="col">
+                    <div className="form-group">
+                      <h6>IS FEATURED?</h6>
+                      <FormControl
+                        // size="small"
+                        className="w-100"
+                        sx={{ m: 0, minWidth: 120 }}
+                      >
+                        <Select
+                          name="isFeatured"
+                          value={isFeaturedValue}
+                          onChange={handleChangeisFeaturedValue}
+                          displayEmpty
+                          inputProps={{ "aria-label": "Without label" }}
+                        >
+                          <MenuItem value="">
+                            <em>None</em>
+                          </MenuItem>
+                          <MenuItem value={true}>True</MenuItem>
+                          <MenuItem value={false}>False</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </div>
+                  </div>
                   <div className="col">
                     <div className="form-group">
                       <h6>PRODUCT STOCK </h6>
                       <input
+                      value={formFields.countInStock}
                         type="text"
                         name="countInStock"
                         onChange={inputChange}
@@ -353,31 +457,40 @@ const ProductUpload = () => {
                 </div>
 
                 <div className="row">
-                  <div className="col">
-                    <div className="form-group">
+                  <div className="col-md-4">
+                    <div class="form-group">
                       <h6>BRAND</h6>
-                      <input type="text" name="brand" onChange={inputChange} />
+                      <input type="text" value={formFields.brand} name="brand" onChange={inputChange} />
                     </div>
                   </div>
-                  <div className="col">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <h6>DISCOUNT</h6>
+                      <input type="text" name="discount" />
+                    </div>
+                  </div>
+
+                  <div className="col-md-4">
                     <div className="form-group">
-                      <h6>IS FEATURED?</h6>
+                      <h6>PRODUCT RAMS</h6>
                       <FormControl
+                        // size="small"
                         className="w-100"
                         sx={{ m: 0, minWidth: 120 }}
                       >
                         <Select
-                          name="isFeatured"
-                          value={featuredSelect}
-                          onChange={handleFeatureChange}
+                          value={ramProduct}
+                          onChange={handleRamChange}
                           displayEmpty
                           inputProps={{ "aria-label": "Without label" }}
                         >
                           <MenuItem value="">
                             <em>None</em>
                           </MenuItem>
-                          <MenuItem value={true}>True</MenuItem>
-                          <MenuItem value={false}>False</MenuItem>
+                          <MenuItem value={"4G"}>4G</MenuItem>
+                          <MenuItem value={"8G"}>8G</MenuItem>
+                          <MenuItem value={"16G"}>16G</MenuItem>
+                          <MenuItem value={"32G"}>32G</MenuItem>
                         </Select>
                       </FormControl>
                     </div>
@@ -416,9 +529,16 @@ const ProductUpload = () => {
                       previewImg?.length !==0 && previewImg?.map((image, index) => {
                         return (
                           <div className="uploadBox" key={index}>
-                            <img src={image} className="w-100" />
+                          {
+                            isSelectedFiles === true ? 
+                            <img src={`${image}`} className="w-100" />
+                            :
+                            <img src={`${context.baseUrl}/uploads/productsUploaded/${image}`} className="w-100" />
+                          }
+                          
+                          
                           </div>
-                        )
+                        );
                       })
                     }
 
@@ -457,4 +577,4 @@ const ProductUpload = () => {
   );
 };
 
-export default ProductUpload;
+export default EditProduct;
