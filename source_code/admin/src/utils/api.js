@@ -36,11 +36,11 @@ export const deleteData = async (url) => {
 }
 
 export const uploadImage = async (url, formData) => {
-  const { res } = await axios.post(process.env.REACT_APP_BASE_URL + url , formData)
+  const { res } = await axios.post(`http://localhost:5000${url}` , formData)
   return res;
 }
 
 export const deleteImages = async (url,image ) => {
-  const { res } = await axios.delete(`${process.env.REACT_APP_BASE_URL}${url}`,image);
+  const { res } = await axios.delete(`http://localhost:5000${url}`,image);
   return res;
 }

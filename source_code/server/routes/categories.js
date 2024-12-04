@@ -1,5 +1,8 @@
 const { Category } = require("../models/category");
 const express = require("express");
+const {ImageUpload} = require("../models/imageUpload");
+
+
 const router = express.Router();
 const cloudinary = require("cloudinary").v2;
 
@@ -7,6 +10,7 @@ cloudinary.config({
   cloud_name: process.env.REACT_APP_CLOUD_NAME_CLOUDINARY,
   api_key: process.env.REACT_APP_CLOUD_APIKEY_CLOUDINARY,
   api_secret: process.env.REACT_APP_CLOUD_APISECRET_CLOUDINARY,
+  secure: true
 });
 const multer  = require('multer')
 const fs = require('fs')
@@ -32,28 +36,160 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage })
 
 router.post(`/upload`, upload.array("images"), async(req, res) => {
-  if(categoryEditId !== undefined) {
-    const category = await Category.findById(categoryEditId);
 
-    const images = category.images;
-
-    if(images.length !==0 ) {
-      for(image of images) {
-        fs.unlinkSync(`uploads/categoryUploaded/${images}`);
-      }
-    }
-  }
+  try {
 
     imagesArray = [];
-    const files = req.files;
 
-    for(let i=0; i<files.length; i++) {
-      imagesArray.push(files[i].filename)
+    const uploadPromises = req.files.map(async (file) => {
+
+      const options = {
+
+        folder: "oclock_mern", // Add a folder to organize uploads
+
+        resource_type: "auto",
+
+        public_id: `${Date.now()}_${file.originalname.split('.')[0]}`, // Create unique public_id
+
+      };
+
+
+
+      // Upload to Cloudinary and wait for the result
+
+      const result = await cloudinary.uploader.upload(file.path, options);
+
+      // Clean up local file after successful upload
+
+      fs.unlinkSync(file.path);
+
+      return result.secure_url;
+
+    });
+
+
+
+    // Wait for all uploads to complete
+
+    const uploadedUrls = await Promise.all(uploadPromises);
+
+    imagesArray = uploadedUrls;
+
+
+
+    // Save to ImageUpload collection
+
+    const imagesUploaded = new ImageUpload({
+
+      images: imagesArray
+
+    });
+
+    await imagesUploaded.save();
+
+
+
+    return res.status(200).json(imagesArray);
+
+    
+
+  } catch (error) {
+
+    console.error("Error uploading images:", error);
+
+    // Clean up any local files in case of error
+
+    req.files?.forEach(file => {
+
+      if (fs.existsSync(file.path)) {
+
+        fs.unlinkSync(file.path);
+
+      }
+
+    });
+
+    return res.status(500).json({ error: "Failed to upload images" });
+
+  }
+
+});
+
+// Update the deleteImage route
+
+router.delete('/deleteImage', async (req, res) => {
+
+  try {
+
+    const { img } = req.query;
+
+    
+
+    if (!img) {
+
+      return res.status(400).json({ error: "Image parameter is required" });
+
     }
 
-    res.json(imagesArray);
+
+
+    // Extract public_id from Cloudinary URL
+
+    const publicId = img.split('/').pop().split('.')[0];
+
+
+
+    try {
+
+      // Delete image from Cloudinary
+
+      await cloudinary.uploader.destroy(publicId);
+
+      
+
+      // Update ImageUpload collection to remove the image
+
+      await ImageUpload.updateMany(
+
+        { images: img },
+
+        { $pull: { images: img } }
+
+      );
+
+
+
+      res.status(200).json({ message: "Image deleted successfully" });
+
+    } catch (cloudinaryError) {
+
+      console.error("Cloudinary delete error:", cloudinaryError);
+
+      // If image doesn't exist in Cloudinary, still remove from database
+
+      await ImageUpload.updateMany(
+
+        { images: img },
+
+        { $pull: { images: img } }
+
+      );
+
+      res.status(200).json({ message: "Image reference removed" });
+
+    }
+
+
+
+  } catch (error) {
+
+    console.error("Error deleting image:", error);
+
+    res.status(500).json({ error: "Failed to delete image" });
+
   }
-)
+
+});
 
 router.get("/all", async (req, res) => {
   const categoryList = await Category.find();
@@ -135,6 +271,8 @@ router.post("/create", async (req, res) => {
   }
 
   category = await category.save();
+
+  imagesArray = [];
 
   res.status(201).json(category);
 });

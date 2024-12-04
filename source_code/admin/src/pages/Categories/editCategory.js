@@ -57,44 +57,46 @@ const CategoryEdit = () => {
   let { id } = useParams();
   const formdata = new FormData();
 
+  const removeImg = async (index, imgUrl) => {
+    const imgIndex = previews.indexOf(imgUrl);
+
+    await deleteImages(`/api/category/deleteImage?img=${imgUrl}`).then(
+      (res) => {
+        context.setAlertBox({
+          open: true,
+
+          error: false,
+
+          msg: "Image Deleted!",
+        });
+      }
+    );
+
+    if (imgIndex > -1) {
+      // only splice array when item is found
+
+      previews.splice(index, 1); // 2nd parameter means remove one item only
+    }
+  };
+
   const onChangeFile = async (e, apiEndPoint) => {
     try {
-      const imgArr = [];
       const files = e.target.files;
 
-      setImgFiles(e.target.files);
-      // setUploading(true);
+      setUploading(true);
 
+      //const fd = new FormData();
       for (var i = 0; i < files.length; i++) {
         // Validate file type
         if (
           files[i] &&
           (files[i].type === "image/jpeg" ||
             files[i].type === "image/jpg" ||
-            files[i].type === "image/png" ||
-            files[i].type === "image/webp")
+            files[i].type === "image/png")
         ) {
-          setImgFiles(e.target.files)
           const file = files[i];
-            imgArr.push(file);
+
           formdata.append(`images`, file);
-
-          setFiles(imgArr);
-          context.setAlertBox({
-            open: true,
-            error: false,
-            msg: "image uploaded",
-          });
-
-          setIsSelectedFiles(true);
-          console.log(imgArr);
-          postData(apiEndPoint,formdata).then((res) => {
-            context.setAlertBox({
-              open: true,
-            error: false,
-            msg: "image uploaded",
-            })
-          })
         } else {
           context.setAlertBox({
             open: true,
@@ -109,25 +111,55 @@ const CategoryEdit = () => {
       console.log(error);
     }
 
-    
+    uploadImage(apiEndPoint, formdata).then((res) => {
+      fetchDataFromAPI("/api/imageUpload").then((response) => {
+        if (
+          response !== undefined &&
+          response !== null &&
+          response !== "" &&
+          response.length !== 0
+        ) {
+          response.length !== 0 &&
+            response.map((item) => {
+              item?.images.length !== 0 &&
+                item?.images?.map((img) => {
+                  img_arr.push(img);
+
+                  //console.log(img)
+                });
+            });
+
+          uniqueArray = img_arr.filter(
+            (item, index) => img_arr.indexOf(item) === index
+          );
+          const appendedArray = [...previews, ...uniqueArray];
+
+          setPreviews(appendedArray);
+
+          setTimeout(() => {
+            setUploading(false);
+            img_arr = [];
+            uniqueArray=[];
+            fetchDataFromAPI("/api/imageUpload").then((res) => {
+              res?.map((item) => {
+                item?.images?.map((img) => {
+                  deleteImages(`/api/category/deleteImage?img=${img}`).then((res) => {
+                    deleteData("/api/imageUpload/deleteAllImages");
+                  });
+                });
+              });
+            });
+            context.setAlertBox({
+              open: true,
+              error: false,
+              msg: "Images Uploaded!",
+            });
+          }, 500);
+        }
+      });
+    });
   };
-  useEffect(() => {
-    if (!imgFiles) return;
-    let tmp = [];
-    for (let i = 0; i < imgFiles.length; i++) {
-      tmp.push(URL.createObjectURL(imgFiles[i]));
-    }
 
-    const objectURLs = tmp;
-    setPreviews(objectURLs);
-
-    // free memory
-    for (let i = 0; i < objectURLs.length; i++) {
-      return () => {
-        URL.revokeObjectURL(objectURLs[i]);
-      };
-    }
-  }, [imgFiles]);
   // for notification bottom left corner
   const { enqueueSnackbar } = useSnackbar();
 
@@ -142,15 +174,25 @@ const CategoryEdit = () => {
 
   useEffect(() => {
     context.setProgress(20);
-    fetchAllDataFromAPI(`/api/category/${id}`).then((res) => {
-      console.log("check")
-      console.log(res)
-      setCategory(res);
-      setFormFields({
-        name: res.name,
-        description: res.description,
+    fetchAllDataFromAPI("/api/imageUpload").then((res) => {
+      res?.map((item) => {
+        item?.images?.map((img) => {
+          deleteImages(`/api/category/deleteImage?img=${img}`).then((res) => {
+            deleteData("/api/imageUpload/deleteAllImages");
+          });
+        });
       });
-      setPreviews(res.images);
+    });
+
+    fetchDataFromAPI(`/api/category/${id}`).then((res) => {
+      setCategory(res);
+      setPreviews(res?.images);
+      setFormFields({
+        name: res?.name,
+        description: res?.description,
+      });
+    console.log("upload:" ,category);
+
       context.setProgress(100);
     });
   }, []);
@@ -158,25 +200,46 @@ const CategoryEdit = () => {
   // submit form
   const editCategory = (e) => {
     e.preventDefault();
+    const appendedArray = [...previews, ...uniqueArray];
+    console.log(appendedArray);
+
+    img_arr = [];
     formdata.append("name", formFields.name);
     formdata.append("description", formFields.description);
 
+    formdata.append("images", appendedArray);
+
+    formFields.images = appendedArray;
+
     console.log(formFields);
-    if (formFields.name !== "" && formFields.description !== "") {
+    if (
+      formFields.name !== "" &&
+      formFields.description !== "" &&
+      previews.length !== 0
+    ) {
       setIsLoading(true);
+
       editData(`/api/category/${id}`, formFields).then((res) => {
+        // console.log(res);
         setIsLoading(false);
+        context.fetchCategory();
+
+        deleteData("/api/imageUpload/deleteAllImages");
+
         history("/categories");
-        console.log("siuu");
       });
     } else {
       context.setAlertBox({
-        msg: "Please fill all the details",
-        color: "success",
         open: true,
+        error: true,
+        msg: "Please fill all the details",
       });
       return false;
     }
+
+    // fetchDataFromAPI("/api/category").then(res => {
+    //   console.log(res)
+    // })
   };
 
   const changeInput = (e) => {
@@ -252,12 +315,21 @@ const CategoryEdit = () => {
                       previews?.map((img, index) => {
                         return (
                           <div className="uploadBox" key={index}>
-                          {
-                            isSelectedFiles === true ? 
-                            <img src={`${img}`} className="w-100" />
-                            :
-                            <img src={`${context.baseUrl}/uploads/categoryUploaded/${img}`} className="w-100" />
-                          }
+                            
+                              <span
+                              className="remove"
+                              onClick={() => removeImg(index, img)}
+                            >
+                              <IoCloseSharp />
+                            </span>
+                          <div className="box">
+                              <LazyLoadImage
+                                alt={"image"}
+                                effect="blur"
+                                className="w-100"
+                                src={img}
+                              />
+                            </div>
                           
                           
                           </div>

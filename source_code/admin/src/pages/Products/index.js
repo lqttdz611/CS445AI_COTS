@@ -304,7 +304,7 @@ const Products = () => {
                               </Button>
                             </Link>
 
-                            <Link to={`/product/edit/${item._id}`}>
+                            <Link to={`/product/edit/${item._qqqqqid}`}>
                             <Button className="edit ">
                               <FaEdit />
                             </Button>
