@@ -244,10 +244,9 @@ const Products = () => {
                   <th>CATEGORY</th>
                   <th>BRAND</th>
                   <th>PRICE</th>
-                  <th>STOCK</th>
+                  
                   <th>RATING</th>
-                  <th>ORDER</th>
-                  <th>SALES</th>
+                  
                   <th>ACTION</th>
                 </tr>
               </thead>
@@ -263,7 +262,7 @@ const Products = () => {
                             <div className="imgWrapper">
                               <div className="img card shadow m-0">
                                 <img
-                                  src={`http://localhost:5000/uploads/productsUploaded/${item.images[0]}`}
+                                  src={item.images[0]}
                                   alt="product test"
                                   className="w-100"
                                 ></img>
@@ -271,10 +270,9 @@ const Products = () => {
                             </div>
 
                             <div className="info pl-3">
-                              <h6>{item.description}</h6>
+                              <h6>{item.name}</h6>
                               <p>
-                                Women's exclusive summer Tops and skirt set for
-                                Female Tops and skirt set
+                              {item.description}
                               </p>
                             </div>
                           </div>
@@ -293,9 +291,7 @@ const Products = () => {
                             readOnly
                           />
                         </td>
-                        <td>4.9(16)</td>
-                        <td>380</td>
-                        <td>$38k</td>
+                        
                         <td>
                           <div className="actions d-flex align-items-center">
                             <Link to="/product/details">
@@ -304,7 +300,7 @@ const Products = () => {
                               </Button>
                             </Link>
 
-                            <Link to={`/product/edit/${item._qqqqqid}`}>
+                            <Link to={`/product/edit/${item._id}`}>
                             <Button className="edit ">
                               <FaEdit />
                             </Button>

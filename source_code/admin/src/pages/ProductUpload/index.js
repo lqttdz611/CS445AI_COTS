@@ -14,7 +14,8 @@ import { FaCloudUploadAlt } from "react-icons/fa";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import Rating from "@mui/material/Rating";
 import {MyContext} from "../../App"
-import { deleteData, fetchAllDataFromAPI, fetchDataFromAPI, postData } from "../../utils/api";
+import { deleteData, deleteImages, fetchAllDataFromAPI, fetchDataFromAPI, postData, uploadImage } from "../../utils/api";
+import CircularProgress from "@mui/material/CircularProgress";
 const StyledBreadcrumb = styled(Chip)(({ theme }) => {
   const backgroundColor =
     theme.palette.mode === "light"
@@ -41,6 +42,7 @@ const ProductUpload = () => {
   const context = useContext(MyContext);
 
   const [uploading, setUploading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   // for rating controlled
   const [valueRating, setValueRating] = useState(2);
 
@@ -54,7 +56,7 @@ const ProductUpload = () => {
     category: "",
     countInStock: 0,
     rating: 0,
-    isFeatured: false,
+    isFeatured: null,
   });
   const [cateData, setCateData] = useState([]);
 
@@ -70,7 +72,7 @@ const ProductUpload = () => {
   //
   const [categoryItem, setCategoryItem] = useState("");
   const [featuredSelect, setFeaturedSelect] = useState("");
-  const handleChange = (event: SelectChangeEvent) => {
+  const handleCategoryChange = (event: SelectChangeEvent) => {
     setCategoryItem(event.target.value);
     setFormFields({
       ...formFields,
@@ -87,10 +89,19 @@ const ProductUpload = () => {
   };
 
 
+
+  let img_arr = [];
+
+  let uniqueArray = [];
+  const [previews, setPreviews] = useState([]);
   const addProduct = (e) => {
     e.preventDefault();
     // console.log(formFields);
+    const appendedArray = [...previews, ...uniqueArray];
 
+
+
+    img_arr = [];
     formdata.append("name", formFields.name);
     formdata.append("description", formFields.description);
     formdata.append("brand", formFields.brand);
@@ -101,70 +112,118 @@ const ProductUpload = () => {
     formdata.append("rating", formFields.rating);
     formdata.append("isFeatured", formFields.isFeatured);
 
+    formFields.images = appendedArray;
+    appendedArray.forEach((image) => {
+      formdata.append("images", image); // Ensure images are appended correctly
+    });
     if (formFields.name === "") {
-      // context.setAlertBox({
-      //   open: true,
-      //   msg: "please add product name",
-      //   error: true,
-      // });
-      alert("plz add product name")
+      context.setAlertBox({
+        open: true,
+        msg: "please add product name",
+        error: true,
+      });
       return false;
+      
     }
     if (formFields.description === "") {
-      // context.setAlertBox({
-      //   open: true,
-      //   msg: "please add product description",
-      //   error: true,
-      // });
-      alert("plz add product description")
+      context.setAlertBox({
+        open: true,
+        msg: "please add product description",
+        error: true,
+      });
       return false;
+      
     }
     if (formFields.brand === "") {
-      // context.setAlertBox({
-      //   open: true,
-      //   msg: "please add product brand",
-      //   error: true,
-      // });
-      alert("please add product brand")
+      context.setAlertBox({
+        open: true,
+        msg: "please add product brand",
+        error: true,
+      });
       return false;
+      
     }
     if (formFields.price === null) {
-      // context.setAlertBox({
-      //   open: true,
-      //   msg: "please add product price",
-      //   error: true,
-      // });
-      alert("please add product price")
+      context.setAlertBox({
+        open: true,
+        msg: "please add product price",
+        error: true,
+      });
       return false;
     }
     if (formFields.oldPrice === null) {
-      // context.setAlertBox({
-      //   open: true,
-      //   msg: "please add product oldPrice",
-      //   error: true,
-      // });
-      alert("please add product oldPrice")
+      context.setAlertBox({
+        open: true,
+        msg: "please add product oldPrice",
+        error: true,
+      });
       return false;
+    }
+    if (formFields.rating === 0) {
+
+      context.setAlertBox({
+
+        open: true,
+
+        msg: "please select product rating",
+
+        error: true,
+
+      });
+
+      return false;
+
     }
     if (formFields.category === "") {
-      // context.setAlertBox({
-      //   open: true,
-      //   msg: "please select a category",
-      //   error: true,
-      // });
-      alert("please select a category")
+      context.setAlertBox({
+        open: true,
+        msg: "please select a category",
+        error: true,
+      });
       return false;
     }
-    if(isSelectedFiles === false) {
-      alert("please select a category")
+    if (previews.length === 0) {
+      context.setAlertBox({
+        open: true,
+        msg: "please select images",
+        error: true,
+      });
       return false;
     }
-    postData(`/api/products/create/`, formFields).then((res) => {
-      console.log(res);
-      alert("Upload success!!")
-      console.log("success");
+    if (formFields.featured === null) {
+      context.setAlertBox({
+        open: true,
+        msg: "please select the product is a featured or not",
+        error: true,
+      });
+      return false;
+    }
+
+    setIsLoading(true);
+    
+    postData("/api/products/create", formFields).then((res) => {
+
+      context.setAlertBox({
+
+        open: true,
+
+        msg: "The product is created!",
+
+        error: false,
+
+      });
+
+
+
+      setIsLoading(false);
+
+      deleteData("/api/imageUpload/deleteAllImages");
+
+
+
       history("/products");
-    })
+
+    });
   };
 
   const inputChange = (e) => {
@@ -175,15 +234,13 @@ const ProductUpload = () => {
   };
 
   const formdata = new FormData();
-  const [files, setFiles] = useState([]);
-  const [isSelectedFiles, setIsSelectedFiles] = useState(false);
-  const [imgFiles, setImgFiles] = useState();
-  const [previewImg, setPreViewImg] = useState();
+
   const onChangeFile = async (e, apiEndPoint) => {
     try {
-      const imgArr = [];
       const files = e.target.files;
+      setUploading(true);
 
+      //const fd = new FormData();
       for (var i = 0; i < files.length; i++) {
         // Validate file type
         if (
@@ -193,53 +250,91 @@ const ProductUpload = () => {
             files[i].type === "image/png" ||
             files[i].type === "image/webp")
         ) {
-          setImgFiles(e.target.files)
           const file = files[i];
-            imgArr.push(file);
-          formdata.append(`images`, file);
-          }
 
-          else {
+          formdata.append(`images`, file);
+        } else {
           context.setAlertBox({
             open: true,
             error: true,
             msg: "Please select a valid JPG or PNG image file.",
           });
 
-          
+          setUploading(false);
+          return false;
         }
       }
-
-      setIsSelectedFiles(true);
-      setFiles(imgArr);
-      console.log(imgArr);
-      postData(apiEndPoint, formdata).then((res) => {
-        
-      })
     } catch (error) {
       console.log(error);
     }
 
-    
+    uploadImage(apiEndPoint, formdata).then((res) => {
+      fetchDataFromAPI("/api/imageUpload").then((response) => {
+        if (
+          response !== undefined &&
+          response !== null &&
+          response !== "" &&
+          response.length !== 0
+        ) {
+          response.length !== 0 &&
+            response.map((item) => {
+              item?.images.length !== 0 &&
+                item?.images?.map((img) => {
+                  img_arr.push(img);
+
+                  //console.log(img)
+                });
+            });
+
+          uniqueArray = img_arr.filter(
+            (item, index) => img_arr.indexOf(item) === index
+          );
+          const appendedArray = [...previews, ...uniqueArray];
+
+          setPreviews(appendedArray);
+
+          setTimeout(() => {
+            setUploading(false);
+            img_arr = [];
+            uniqueArray = [];
+            fetchDataFromAPI("/api/imageUpload").then((res) => {
+              res?.map((item) => {
+                item?.images?.map((img) => {
+                  deleteImages(`/api/products/deleteImage?img=${img}`).then(
+                    (res) => {
+                      deleteData("/api/imageUpload/deleteAllImages");
+                    }
+                  );
+                });
+              });
+            });
+            context.setAlertBox({
+              open: true,
+              error: false,
+              msg: "Images Uploaded!",
+            });
+          }, 500);
+        }
+      });
+    });
   };
 
-  useEffect(() => {
-    if(!imgFiles) return
-    let tmp = []
-    for(let i=0; i<imgFiles.length; i++) {
-      tmp.push(URL.createObjectURL(imgFiles[i]))
-    }
+  const removeImg = async (index, imgUrl) => {
+    const imgIndex = previews.indexOf(imgUrl);
 
-    const objectURLs = tmp;
-    setPreViewImg(objectURLs);
+    deleteImages(`/api/category/deleteImage?img=${imgUrl}`).then((res) => {
+      context.setAlertBox({
+        open: true,
+        error: false,
+        msg: "Image Deleted!",
+      });
+    });
 
-    // free memory
-    for(let i=0; i<objectURLs.length; i++) {
-      return() => {
-        URL.revokeObjectURL(objectURLs[i])
-      }
+    if (imgIndex > -1) {
+      // only splice array when item is found
+      previews.splice(index, 1); // 2nd parameter means remove one item only
     }
-  },[imgFiles])
+  };
 
 
 
@@ -301,7 +396,7 @@ const ProductUpload = () => {
                         <Select
                           name="category"
                           value={categoryItem}
-                          onChange={handleChange}
+                          onChange={handleCategoryChange}
                           displayEmpty
                           inputProps={{ "aria-label": "Without label" }}
                         >
@@ -412,36 +507,51 @@ const ProductUpload = () => {
             <div className="imagesUploadSec">
               <h5 className="mb-4">Media and Published</h5>
               <div className="imgUploadBox d-flex align-items-center">
-              {
-                      previewImg?.length !==0 && previewImg?.map((image, index) => {
-                        return (
-                          <div className="uploadBox" key={index}>
-                            <img src={image} className="w-100" />
-                          </div>
-                        )
-                      })
-                    }
+                {previews.length !== 0 &&
+                  previews?.map((image, index) => {
+                    return (
+                      <div className="uploadBox" key={index}>
+                        <span
+                          className="remove"
+                          onClick={() => removeImg(index, image)}
+                        >
+                          <IoMdRemove />
+                        </span>
+                        <div className="box">
+                          <LazyLoadImage
+                            alt={"image"}
+                            effect="blur"
+                            className="w-100"
+                            src={image}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
 
                 <div className="uploadBox">
-                  <input type="file" multiple onChange={(e) =>
+                  {uploading === true ? (
+                    <div className="progressBar text-center d-flex align-items-center justify-content-center flex-column">
+                      <CircularProgress />
+                      <span>Uploading...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <input
+                        type="file"
+                        multiple
+                        onChange={(e) =>
                           onChangeFile(e, "/api/products/upload")
-                        } name="images" />
-                         
-                  <div className="info">
-                    <PiImages />
-                    <h5>image upload</h5>
-                  </div>
+                        }
+                        name="images"
+                      />
+                      <div className="info">
+                        <FaCloudUploadAlt />
+                        <h5>image upload</h5>
+                      </div>
+                    </>
+                  )}
                 </div>
-
-                <div className="uploadBox">
-                  <input type="file" multiple="" name="images" />
-                  <div className="info">
-                    <PiImages />
-                    <h5>image upload</h5>
-                  </div>
-                </div>
-
-
               </div>
 
               <br />

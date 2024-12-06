@@ -3,6 +3,8 @@ const { Product } = require("../models/products");
 const express = require("express");
 const router = express.Router();
 const cloudinary = require("cloudinary").v2;
+
+const { ImageUpload } = require("../models/imageUpload");
 const multer = require("multer");
 const fs = require("fs");
 var imagesArray = [];
@@ -29,60 +31,85 @@ const storage = multer.diskStorage({
   },
 });
 const upload = multer({ storage: storage });
-// router.post(`/upload`, upload.array("images"), async(req,res) => {
-//   imagesArray= [];
-//   const files= req.files;
 
-//   for(let i=0; i<files.length; i++) {
-//     imagesArray.push(files[i].filename);
-//   }
-
-//   console.log(imagesArray)
-
-//   res.json(imagesArray)
-// })
 router.post(`/upload`, upload.array("images"), async (req, res) => {
-  let images;
-  if (productEditId !== undefined) {
-    const product = await Product.findById(productEditId);
+  try {
+    imagesArray = [];
+    const uploadPromises = req.files.map(async (file) => {
+      const options = {
+        folder: "oclock_mern", // Add a folder to organize uploads
+        resource_type: "auto",
+        public_id: `${Date.now()}_${file.originalname.split(".")[0]}`, // Create unique public_id
+      };
 
-    if (product) {
-      images = product.images;
-    }
-    if (!product) {
-      return res.status(404).json({
-        message: "Product not found",
-        success: false,
-      });
-    }
+      // Upload to Cloudinary and wait for the result
+      const result = await cloudinary.uploader.upload(file.path, options);
+      // Clean up local file after successful upload
+      fs.unlinkSync(file.path);
+      return result.secure_url;
+    });
 
-    if (images.length !== 0) {
-      for (let image of images) {
-        fs.unlinkSync(`uploads/productsUploaded/${image}`);
+    // Wait for all uploads to complete
+    const uploadedUrls = await Promise.all(uploadPromises);
+    imagesArray = uploadedUrls;
+
+    // Save to ImageUpload collection
+    const imagesUploaded = new ImageUpload({
+      images: imagesArray,
+    });
+    await imagesUploaded.save();
+
+    return res.status(200).json(imagesArray);
+  } catch (error) {
+    console.error("Error uploading images:", error);
+    // Clean up any local files in case of error
+    req.files?.forEach((file) => {
+      if (fs.existsSync(file.path)) {
+        fs.unlinkSync(file.path);
       }
+    });
+    return res.status(500).json({ error: "Failed to upload images" });
+  }
+});
+router.delete("/deleteImage", async (req, res) => {
+  try {
+    const { img } = req.query;
+
+    if (!img) {
+      return res.status(400).json({ error: "Image parameter is required" });
     }
+
+    // Extract public_id from Cloudinary URL
+    const publicId = img.split("/").pop().split(".")[0];
+
+    try {
+      // Delete image from Cloudinary
+      await cloudinary.uploader.destroy(publicId);
+
+      // Update ImageUpload collection to remove the image
+      await ImageUpload.updateMany({ images: img }, { $pull: { images: img } });
+
+      res.status(200).json({ message: "Image deleted successfully" });
+    } catch (cloudinaryError) {
+      console.error("Cloudinary delete error:", cloudinaryError);
+      // If image doesn't exist in Cloudinary, still remove from database
+      await ImageUpload.updateMany({ images: img }, { $pull: { images: img } });
+      res.status(200).json({ message: "Image reference removed" });
+    }
+  } catch (error) {
+    console.error("Error deleting image:", error);
+    res.status(500).json({ error: "Failed to delete image" });
   }
+});
+router.get("/all", async (req, res) => {
+  const productList = await Product.find();
 
-  imagesArray = [];
-  const files = req.files;
-
-  for (let i = 0; i < files.length; i++) {
-    imagesArray.push(files[i].filename);
+  if (!productList) {
+    res.status(500).json({ success: false });
   }
-
-  res.send(imagesArray);
+  res.send(productList);
 });
 
-// router.get("/", async (req, res) => {
-//   const productList = await Product.find().populate("category");
-
-//   if (!productList) {
-//     res.status(500).json({
-//       success: false,
-//     });
-//   }
-//   res.send(productList);
-// });
 
 router.get("/", async (req, res) => {
   const page = parseInt(req.query.page) || 1;
@@ -118,6 +145,14 @@ router.get("/", async (req, res) => {
 
     page: page,
   });
+});
+
+router.get("/featured", async (req, res) => {
+  const productList = await Product.find({ isFeatured: true });
+  if (!productList) {
+    res.status(500).json({ success: false });
+  }
+  return res.status(200).json(productList);
 });
 
 router.post("/create", async (req, res) => {
@@ -206,71 +241,80 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
-  const product = await Product.findById(req.params.id);
-  const images = product.images;
-
-  if (images.length !== 0) {
-    for (image of images) {
-      fs.unlinkSync(`uploads/productsUploaded/${image}`);
-    }
-  }
-  const deleteProduct = await Product.findByIdAndDelete(req.params.id);
-  if (!deleteProduct) {
-    return res.status(404).json({
-      message: "product not found!",
-      status: false,
-    });
-  }
-
-  res.status(200).send({
-    message: "the product was deleted!",
-    status: true,
-  });
-});
-
 // router.delete("/:id", async (req, res) => {
-//   try {
-//     const { id } = req.params;
+//   const product = await Product.findById(req.params.id);
+//   const images = product.images;
 
-//     // Check if the ID is valid
-//     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-//       return res.status(400).json({
-//         message: "Invalid product ID!",
-//         status: false,
-//       });
+//   if (images.length !== 0) {
+//     for (image of images) {
+//       fs.unlinkSync(`uploads/productsUploaded/${image}`);
 //     }
-
-//     const product = await Product.findById(id);
-
-//     // Check if the product exists
-//     if (!product) {
-//       return res.status(404).json({
-//         message: "Product not found!",
-//         status: false,
-//       });
-//     }
-
-//     // Delete images from the filesystem
-//     if (product.images.length !== 0) {
-//       for (const image of product.images) {
-//         fs.unlinkSync(`upload/${image}`);
-//       }
-//     }
-
-//     // Delete the product from the database
-//     await Product.findByIdAndDelete(id);
-
-//     res.status(200).send({
-//       message: "The product was deleted!",
-//       status: true,
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       message: "An error occurred while deleting the product.",
+//   }
+//   const deleteProduct = await Product.findByIdAndDelete(req.params.id);
+//   if (!deleteProduct) {
+//     return res.status(404).json({
+//       message: "product not found!",
 //       status: false,
-//       error: error.message,
 //     });
 //   }
+
+//   res.status(200).send({
+//     message: "the product was deleted!",
+//     status: true,
+//   });
 // });
+router.delete("/:id", async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found!", status: false });
+    }
+
+    const images = product.images;
+
+    // Handle image deletion
+    if (images.length !== 0) {
+      for (const image of images) {
+        if (image.startsWith("http")) {
+          // Remote URL (e.g., Cloudinary)
+          const publicId = image.split("/").slice(-2).join("/").split(".")[0]; // Extract publicId
+          try {
+            await cloudinary.uploader.destroy(publicId);
+            console.log(`Deleted remote image: ${image}`);
+          } catch (cloudError) {
+            console.error(`Failed to delete remote image: ${image}`, cloudError);
+          }
+        } else {
+          // Local file
+          const localPath = `uploads/productsUploaded/${image}`;
+          if (fs.existsSync(localPath)) {
+            fs.unlinkSync(localPath);
+            console.log(`Deleted local file: ${localPath}`);
+          } else {
+            console.warn(`Local file not found: ${localPath}`);
+          }
+        }
+      }
+    }
+
+    // Delete the product
+    const deleteProduct = await Product.findByIdAndDelete(req.params.id);
+    if (!deleteProduct) {
+      return res.status(404).json({
+        message: "Product not found!",
+        status: false,
+      });
+    }
+
+    res.status(200).json({
+      message: "The product was deleted!",
+      status: true,
+    });
+  } catch (error) {
+    console.error("Error in delete route:", error);
+    res.status(500).json({ message: "Internal server error", status: false });
+  }
+});
+
+
 module.exports = router;
