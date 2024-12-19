@@ -685,3 +685,201 @@ h4.item-price.me-1 {
     height: 150px;
   }
 }
+/* header */
+
+
+/* home page */
+.homeProducts {
+  padding: 25px 0px;
+  width: 100%;
+}
+.homeProducts .banner {
+  width: 100%;
+  border-radius: 7px;
+  overflow: hidden;
+}
+.hd {
+  font-size: 20px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.viewAllBtn {
+  padding: 5px 25px !important;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 30px !important;
+  color: #605959 !important;
+  font-weight: 600;
+  text-transform: capitalize !important;
+}
+.viewAllBtn svg {
+  font-size: 20px;
+}
+
+.productItem {
+  background: #f1f1f1;
+  width: 100%;
+  height: auto;
+  color: #000;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s;
+  border-radius: 10px !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.productItem:hover {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+.product_row .productItem {
+  border-right: 1px solid transparent !important;
+}
+.product_row .swiper-slide:last-child .productItem {
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+.swiper {
+  padding: 1px !important;
+}
+.productItem .info {
+  padding: 15px;
+  position: relative;
+  border-radius: 10px;
+  /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); */
+}
+.productItem .info h4 {
+  font-size: 15px;
+  font-weight: 500;
+}
+.productItem .actions {
+  /* position: absolute;
+  top: 20px;
+  right: 10px; 
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  opacity: 0; 
+  visibility: hidden; 
+  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out; */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  opacity: 0;
+  position: absolute;
+  right: 0;
+  top: 20px;
+  transition: all 0.5s ease-in-out;
+  width: 50px;
+  z-index: 1000;
+}
+
+.productItem .actions button {
+  /* display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px !important;
+  height: 40px !important;
+  width: 40px !important;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50% !important;
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(0 0 0 /12%), 0 1px 2px rgb(0 0 0 / 24%) !important; */
+  align-items: center;
+  background: #fff !important;
+  border: 1px solid #0000001a !important;
+  border-radius: 50% !important;
+  box-shadow: 0 1px 3px #0000001f, 0 1px 2px #0000003d !important;
+  display: flex;
+  height: 40px !important;
+  justify-content: center;
+  min-width: 40px !important;
+  transition: all 0s !important;
+  width: 40px !important;
+}
+
+.productItem .actions button svg {
+  color: #000;
+  pointer-events: none;
+  opacity: 0.8;
+  font-size: 15px;
+}
+
+.productItem .actions button:hover {
+  background: #233a95 !important;
+}
+
+.productItem .actions button:hover svg {
+  color: #000000 !important;
+}
+
+.productItem .imgWrapper {
+  background: #fff;
+  border-radius: 7px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  height: 230px;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+.productItem .imgWrapper img {
+  transition: all 0.3s ease-in-out;
+}
+
+.productItem .imgWrapper:hover .actions {
+  opacity: 1;
+  visibility: visible;
+}
+
+.productItem .imgWrapper:hover img {
+  transform: scale(1.1);
+}
+.info .oldPrice {
+  font-size: 16px;
+  font-weight: bold;
+  text-decoration: line-through;
+  color: rgb(0, 0, 0, 0.2);
+}
+.info .oldPrice.lg {
+  font-size: 20px;
+}
+.info .netPrice {
+  font-size: 16px;
+  font-weight: bold;
+}
+.info .netPrice.lg {
+  font-size: 20px;
+}
+
+.product_row .productItem {
+  /* border-right: 1px solid transparent !important; */
+  overflow: hidden;
+  border-right: 1px solid rgba(0, 0, 0, 0.2) !important;
+}
+.product_row {
+  margin-right: 20px;
+}
+
+.productItem .badge {
+  display: inline-block;
+  padding: 7px 10px;
+
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 100;
+}
+
+.productRow2 {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.productRow2 .productItem {
+  overflow: hidden;
+  width: 24%;
+  border-right: 1px solid rgba(0, 0, 0, 0.1) !important;
+}

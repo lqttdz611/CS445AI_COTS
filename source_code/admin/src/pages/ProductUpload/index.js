@@ -54,9 +54,12 @@ const ProductUpload = () => {
     price: 0,
     oldPrice: 0,
     category: "",
+    cateName: "",
+    cateId: "",
     countInStock: 0,
     rating: 0,
     isFeatured: null,
+    discount: 0,
   });
   const [cateData, setCateData] = useState([]);
 
@@ -96,10 +99,7 @@ const ProductUpload = () => {
   const [previews, setPreviews] = useState([]);
   const addProduct = (e) => {
     e.preventDefault();
-    // console.log(formFields);
     const appendedArray = [...previews, ...uniqueArray];
-
-
 
     img_arr = [];
     formdata.append("name", formFields.name);
@@ -108,14 +108,20 @@ const ProductUpload = () => {
     formdata.append("price", formFields.price);
     formdata.append("oldPrice", formFields.oldPrice);
     formdata.append("category", formFields.category);
+    formdata.append("cateName", formFields.catName);
+    formdata.append("cateId", formFields.catId);
     formdata.append("countInStock", formFields.countInStock);
     formdata.append("rating", formFields.rating);
     formdata.append("isFeatured", formFields.isFeatured);
+    formdata.append("discount", formFields.discount);
 
     formFields.images = appendedArray;
     appendedArray.forEach((image) => {
       formdata.append("images", image); // Ensure images are appended correctly
     });
+
+    console.log("hereeeeeeee", formFields);
+
     if (formFields.name === "") {
       context.setAlertBox({
         open: true,
@@ -142,6 +148,14 @@ const ProductUpload = () => {
       });
       return false;
       
+    }
+    if (formFields.discount === null) {
+      context.setAlertBox({
+        open: true,
+        msg: "please select the product discount",
+        error: true,
+      });
+      return false;
     }
     if (formFields.price === null) {
       context.setAlertBox({
@@ -198,6 +212,7 @@ const ProductUpload = () => {
       });
       return false;
     }
+    
 
     setIsLoading(true);
     
@@ -222,7 +237,7 @@ const ProductUpload = () => {
 
 
       history("/products");
-
+      
     });
   };
 
@@ -336,7 +351,10 @@ const ProductUpload = () => {
     }
   };
 
-
+  const selectCate = (cateName,id) => {
+    formFields.cateName = cateName;
+    formFields.cateId = id;
+  }
 
   return (
     <>
@@ -407,7 +425,7 @@ const ProductUpload = () => {
                             cateData?.map((cate, index) => {
                               return (
                                 <MenuItem
-                                  className="text-capitalize"
+                                  className="text-capitalize" onClick={() => selectCate(cate.name,cate.id)}
                                   value={cate.id}
                                 >
                                   {cate.name}
@@ -480,6 +498,17 @@ const ProductUpload = () => {
                 </div>
 
                 <div className="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                      <h6>DISCOUNT</h6>
+                      <input
+                        type="text"
+                        // value={formFields.discount}
+                        name="discount"
+                        onChange={inputChange}
+                      />
+                    </div>
+                  </div>
                   <div className="col-md-4">
                     <div className="form-group">
                       <h6>RATING</h6>

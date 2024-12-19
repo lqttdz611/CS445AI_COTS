@@ -1,5 +1,6 @@
 import React from 'react';
 import './sports.css'
+import Header from '../../components/Layout/Header';
 
 const SportsWatch = () => {
   const watches = [
@@ -54,6 +55,8 @@ const SportsWatch = () => {
   ];
 
   return (
+    <>
+    <Header />
     <div className="page-wrapper">
       <div className="category-header">
         <div className="breadcrumb">
@@ -116,6 +119,7 @@ const SportsWatch = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

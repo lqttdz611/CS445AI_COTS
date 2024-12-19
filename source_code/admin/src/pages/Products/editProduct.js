@@ -63,9 +63,12 @@ const EditProduct = () => {
     price: 0,
     oldPrice: 0,
     category: "",
+    cateName: "",
+    cateId: "",
     countInStock: 0,
     rating: 0,
     isFeatured: null,
+    discount: 0,
   });
   const [cateData, setCateData] = useState([]);
   const [featuredValue, setFeaturedValue] = useState("");
@@ -100,9 +103,12 @@ const EditProduct = () => {
         price: res.price,
         oldPrice: res.oldPrice,
         category: res.category,
+        cateName: res.cateName,
+        cateId: res.cateId,
         countInStock: res.countInStock,
         rating: res.rating,
         isFeatured: res.isFeatured,
+        discount: res.discount,
       });
       console.log(res);
 
@@ -263,13 +269,14 @@ const EditProduct = () => {
     formdata.append("price", formFields.price);
     formdata.append("oldPrice", formFields.oldPrice);
     // formdata.append("subCatId", formFields.subCatId);
-    // formdata.append("catId", formFields.catId);
-    // formdata.append("catName", formFields.catName);
+    formdata.append("cateName", formFields.catName);
+    formdata.append("cateId", formFields.catId);
     formdata.append("category", formFields.category);
     // formdata.append("subCat", formFields.subCat);
     formdata.append("countInStock", formFields.countInStock);
     formdata.append("rating", formFields.rating);
     formdata.append("isFeatured", formFields.isFeatured);
+    formdata.append("discount", formFields.discount);
 
     formFields.images = appendedArray;
 
@@ -307,6 +314,14 @@ const EditProduct = () => {
       context.setAlertBox({
         open: true,
         msg: "please add product price",
+        error: true,
+      });
+      return false;
+    }
+    if (formFields.discount === null) {
+      context.setAlertBox({
+        open: true,
+        msg: "please select the product discount",
         error: true,
       });
       return false;
@@ -357,6 +372,12 @@ const EditProduct = () => {
       history("/products");
     });
   };
+  
+
+  const selectCate = (cateName,id) => {
+    formFields.cateName = cateName;
+    formFields.cateId = id;
+  }
 
   return (
     <>
@@ -427,7 +448,7 @@ const EditProduct = () => {
                           {cateData?.categoryList?.length !== 0 &&
                             cateData?.categoryList?.map((cate, index) => {
                               return (
-                                <MenuItem
+                                <MenuItem onClick={() => selectCate(cate.name,cate.id)}
                                   className="text-capitalize"
                                   value={cate.id}
                                 >
@@ -502,6 +523,17 @@ const EditProduct = () => {
                 </div>
 
                 <div className="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                      <h6>DISCOUNT</h6>
+                      <input
+                        type="text"
+                        name="discount"
+                        value={formFields.discount}
+                        onChange={inputChange}
+                      />
+                    </div>
+                  </div>
                   <div className="col-md-4">
                     <div className="form-group">
                       <h6>RATING</h6>

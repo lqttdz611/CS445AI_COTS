@@ -110,43 +110,6 @@ router.get("/all", async (req, res) => {
   res.send(productList);
 });
 
-
-router.get("/", async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-
-  const perPage = 5;
-
-  const totalPosts = await Product.countDocuments();
-
-  const totalPages = Math.ceil(totalPosts / perPage);
-
-  if (page > totalPages) {
-    return res.status(404).json({ message: "Page not found!" });
-  }
-
-  const productList = await Product.find()
-
-    .populate("category")
-
-    .skip((page - 1) * perPage)
-
-    .limit(perPage)
-
-    .exec();
-
-  if (!productList) {
-    res.status(500).json({ success: false });
-  }
-
-  return res.status(200).json({
-    productList: productList,
-
-    totalPages: totalPages,
-
-    page: page,
-  });
-});
-
 router.get("/featured", async (req, res) => {
   const productList = await Product.find({ isFeatured: true });
   if (!productList) {
@@ -169,9 +132,12 @@ router.post("/create", async (req, res) => {
     price: req.body.price,
     oldPrice: req.body.oldPrice,
     category: req.body.category,
+    cateName: req.body.cateName,
+    cateId: req.body.cateId,
     countInStock: req.body.countInStock,
     rating: req.body.rating,
     isFeatured: req.body.isFeatured,
+    discount: req.body.discount,
     dateCreated: new Date(),
   });
 
@@ -186,21 +152,84 @@ router.post("/create", async (req, res) => {
   res.status(201).json(product);
 });
 
-router.get("/:id", async (req, res) => {
-  productEditId = req.params.id;
+router.get("/", async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const perPage = parseInt(req.query.perPage) || 8;
+  const totalPosts = await Product.countDocuments();
+  const totalPages = Math.ceil(totalPosts / perPage);
 
-  const product = await Product.findById(req.params.id);
 
-  if (!product) {
-    return res.status(500).json({
-      message: "The product with id given was not found!",
-    });
+  if (page > totalPages) {
+    return res.status(404).json({ message: "Page not found!" });
   }
 
-  res.status(200).send(product);
+  let productList = [];
+
+  if (req.query.minPrice !== undefined && req.query.maxPrice !== undefined) {
+    productList = await Product.find({
+      subCateId: req.query.subCateId,
+    }).populate("category subCate");
+
+    console.log("data", productList);
+    const filteredProducts = productList.filter((product) => {
+      if (req.query.minPrice && product.price < parseInt(+req.query.minPrice)) {
+        return false;
+      }
+      if (req.query.maxPrice && product.price > parseInt(+req.query.maxPrice)) {
+        return false;
+      }
+  
+      if (req.query.rating === 0) return false;
+
+
+      return true;
+    });
+
+    if (!productList) {
+      res.status(500).json({ success: false });
+    }
+    return res.status(200).json({
+      productList: filteredProducts,
+      totalPages: totalPages,
+      page: page,
+    });
+  } else if (req.query.page !== undefined || req.query.perPage !== undefined) {
+    // Áp dụng phân trang giống đoạn code thứ hai
+    productList = await Product.find()
+      .populate("category")
+      .skip((page - 1) * perPage)
+      .limit(perPage)
+      .exec();
+
+    if (!productList) {
+      return res.status(500).json({ success: false });
+    }
+    return res.status(200).json({
+      productList: productList,
+      totalPages: totalPages,
+      page: page,
+    });
+  } else {
+    
+    productList = await Product.find(req.query).populate("category");
+
+    // .skip((page - 1) * perPage)
+    //   .limit(perPage).exec();;
+
+    if (!productList) {
+      res.status(500).json({ success: false });
+    }
+    return res.status(200).json({
+      productList: productList,
+      totalPages: totalPages,
+      page: page,
+      
+    });
+  }
 });
 
-router.put('/:id', async (req, res) => {
+
+router.put("/:id", async (req, res) => {
   try {
     const product = await Product.findByIdAndUpdate(
       req.params.id,
@@ -211,10 +240,13 @@ router.put('/:id', async (req, res) => {
         brand: req.body.brand,
         price: req.body.price,
         category: req.body.category,
+        cateName: req.body.cateName,
+        cateId: req.body.cateId,
         subCate: req.body.subCate,
         countInStock: req.body.countInStock,
         rating: req.body.rating,
-        numReviews: req.body.numReviews,
+        discount: req.body.discount,
+
         isFeatured: req.body.isFeatured,
       },
       { new: true }
@@ -222,19 +254,19 @@ router.put('/:id', async (req, res) => {
 
     if (!product) {
       return res.status(500).json({
-        message: 'The product cannot be updated!',
+        message: "The product cannot be updated!",
         success: false,
       });
     }
 
     res.status(200).json({
-      message: 'Product updated successfully',
+      message: "Product updated successfully",
       success: true,
       product,
     });
   } catch (error) {
     res.status(500).json({
-      message: 'An error occurred while updating the product',
+      message: "An error occurred while updating the product",
       success: false,
       error: error.message,
     });
@@ -267,7 +299,9 @@ router.delete("/:id", async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     if (!product) {
-      return res.status(404).json({ message: "Product not found!", status: false });
+      return res
+        .status(404)
+        .json({ message: "Product not found!", status: false });
     }
 
     const images = product.images;
@@ -282,7 +316,10 @@ router.delete("/:id", async (req, res) => {
             await cloudinary.uploader.destroy(publicId);
             console.log(`Deleted remote image: ${image}`);
           } catch (cloudError) {
-            console.error(`Failed to delete remote image: ${image}`, cloudError);
+            console.error(
+              `Failed to delete remote image: ${image}`,
+              cloudError
+            );
           }
         } else {
           // Local file
@@ -315,6 +352,5 @@ router.delete("/:id", async (req, res) => {
     res.status(500).json({ message: "Internal server error", status: false });
   }
 });
-
 
 module.exports = router;

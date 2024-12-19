@@ -277,7 +277,7 @@ const Products = () => {
                             </div>
                           </div>
                         </td>
-                        <td>{item.category.name} </td>
+                        <td>{item.category?.name} </td>
                         <td>{item.brand}</td>
                         <td style={{ width: "70px" }}>
                           <del class="old">${item.price}</del>

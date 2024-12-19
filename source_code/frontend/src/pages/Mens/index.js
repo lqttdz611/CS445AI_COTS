@@ -1,33 +1,126 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaFilter, FaStar } from 'react-icons/fa';
+import Header from "../../components/Layout/Header";
+import bannerImage from "../../images/donghonambanner.jpg";
+
+
+
+
 
 const MensWatches = () => {
   // Sample product data - replace with your actual data
   const products = [
     {
+
       id: 1,
-      name: "Rolex Submariner",
-      price: 999.99,
+      name: "Rolex - Nam M228238-0005",
+      brand: "Rolex",
+      price: 699.99,
       rating: 4.8,
+      reviews: 106,
+      image: "https://www.watchstore.vn/images/products/others/2024/large/m228238-0005-1712663256.jpg",
+      discount: 10
+    },
+    {
+      id: 2,
+      name: "Rolex Datejust 41 Mặt Số Chocolate 126331-0002",
+      brand: "Rolex",
+      price: 450,
+      rating: 4.9,
       reviews: 156,
-      image: "https://example.com/rolex-submariner.jpg",
-      discount: 15
+      image: "https://empireluxury.vn/wp-content/uploads/2022/06/dong-ho-rolex-datejust-41-126331-0002-mat-so-chocolate-day-deo-jubilee-thep-vang-hong-4.jpg",
+      
+    },
+    {
+      id: 3,
+      name: "Nam Rolex GMT Master II 126718GRNR-001 Yellow Gold Màu Vàng Gold",
+      brand: "Rolex",
+      price: 820,
+      rating: 4.9,
+      reviews: 110,
+      image: "https://cdn.vuahanghieu.com/unsafe/0x0/left/top/smart/filters:quality(90)/https://admin.vuahanghieu.com/upload/news/content/2024/02/dong-ho-nam-rolex-gmt-master-ii-126718grnr-001-yellow-gold-mau-vang-gold-jpg-1708506767-21022024161247.jpg",
+      
+    },
+    {
+      id: 4,
+      name: "Omega Constellation Globemaster Co-Axial Master Chronometer Annual Calendar",
+      brand: "Omega",
+      price: 999.99,
+      rating: 4.9,
+      reviews: 16,
+      image: "https://24kara.com/files/sanpham/26125/1/jpg/dong-ho-omega-constellation-globemaster-co-axial-master-chronometer-annual-calendar-130-53-41-22-99-002-13053412299002.jpg",
+      discount: 10
+    },
+    {
+      id: 5,
+      name: "Omega Constellation 130.93.41.22.99.002 Globemaster 41",
+      brand: "Omega",
+      price: 850,
+      rating: 4.9,
+      reviews: 30,
+      image: "https://cdn.luxshopping.vn/Thumnails/Uploads/News/omega-130-93-41-22-99-002-constellation-globemaster-watch-41mm.png_980_980.webp",
+      discount: 10
+    },
+    {
+      id: 6,
+      name: "Omega Constellation Globemaster Co-Axial Master Chronometer",
+      brand: "Omega",
+      price: 850,
+      rating: 4.9,
+      reviews: 20,
+      image: "https://24kara.com/files/sanpham/26122/1/jpg/dong-ho-omega-constellation-globemaster-co-axial-master-chronometer-130-93-39-21-99-001-13093392199001.jpg",
+      discount: 10
+    },
+    {
+      id: 7,
+      name: "Tag Heuer Formula 1 Watch Chronograph",
+      brand: "Tag Heuer",
+      price: 350,
+      rating: 4.7,
+      reviews: 100,
+      image: "https://m.media-amazon.com/images/I/71mfdLFXQXL._AC_SL1500_.jpg",
+      discount: 0.0
+    },
+    {
+      id: 8,
+      name: "TAG Heuer Monaco Calibre 11 Automatic",
+      brand: "Tag Heuer",
+      price: 899.99,
+      rating: 4.9,
+      reviews: 122,
+      image: "https://product.hstatic.net/1000332793/product/caw211p_master.png",
+      discount: 10
+    },
+    {
+      id: 9,
+      name: "TAG HEUER Aquaracer Professional 300",
+      brand: "Tag Heuer",
+      price: 350,
+      rating: 4.9,
+      reviews: 200,
+      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTU6mmJpnP3YGg5gc5DXkU2kRLv6Dv3stbH1w&s",
+      discount: 10
     },
     // Add more products...
   ];
 
   return (
+    <>
+      <Header />
     <div className="container-fluid py-4">
       {/* Hero Section */}
-      <div className="bg-primary text-white py-4 mb-4">
+      {/* <div className="bg-primary text-white py-4 mb-4">
         <div className="container">
           <h1 className="display-4">Men's Watches</h1>
           <p className="lead">Discover our collection of premium timepieces for men</p>
         </div>
-      </div>
+       
+    </div> */}
+      <img src={bannerImage} className="img-fluid h-48 w-full object-cover" alt="Men's Watches" />
 
-      <div className="container">
+
+      <div className="container p-3">
         <div className="row">
           {/* Filters Sidebar */}
           <div className="col-lg-3 mb-4">
@@ -66,6 +159,7 @@ const MensWatches = () => {
                     </label>
                   </div>
                 </div>
+
 
                 {/* Brands */}
                 <div className="mb-4">
@@ -192,7 +286,9 @@ const MensWatches = () => {
         </div>
       </div>
     </div>
+    </>
   );
+  
 };
 
 export default MensWatches;
