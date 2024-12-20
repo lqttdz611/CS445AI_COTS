@@ -1,10 +1,15 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import image from "../../images/login-image.jpg";
 import { FcGoogle } from "react-icons/fc";
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { Link } from "react-router-dom";
+import { MyContext } from "../../App";
 
 const Login = () => {
+  const context = useContext(MyContext);
+  useEffect(() => {
+    context.setIsHeaderAFooterShow(false);
+  }, []);
     const [visible,setVisible] = useState(null);
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">

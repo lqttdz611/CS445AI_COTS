@@ -27,7 +27,7 @@ return (
         ></img></Link>
         <span className="badge badge-primary">{props?.dataProduct?.discount}%</span>
         <div className="actions">
-          <Button onClick={() => viewProductDetail(1)}>
+          <Button /* onClick={() => viewProductDetail(1)}*/>
             <TfiFullscreen />
           </Button>
           <Button>

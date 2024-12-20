@@ -1,126 +1,92 @@
 import React from 'react';
-import './sports.css'
-import Header from '../../components/Layout/Header';
+import { Link } from 'react-router-dom';
+import { FaFilter, FaStar } from 'react-icons/fa';
+import Header from "../../components/Layout/Header";
+import bannerImage from "../../images/donghosportbanner.jpg";
+import Listing from '../Listing';
 
-const SportsWatch = () => {
-  const watches = [
+const WomensWatches = () => {
+  // Sample product data - replace with your actual data
+  const products = [
     {
       id: 1,
-      name: 'GOAAAL vinyl record clock',
-      image: '/images/goaaal-watch.png',
-      originalPrice: '39.00 €',
-      salePrice: '32.00 €',
-      category: 'Sport'
+      name: "Rolex Geneve",
+      brand: "Rolex",
+      rating: 5,
+      reviews: 156,
+      image: "https://bossluxurywatch.vn/uploads/tin-tuc/0-anh-bai-tin-tuc-vuacontent/ngay-1-12/3-dong-ho-rolex-geneve-nu-10.jpg",
+      price: 530.000,
+      discount: 15
     },
     {
       id: 2,
-      name: 'BICYCLE RACE vinyl record clock',
-      image: '/images/bicycle-race-watch.png',
-      originalPrice: '39.00 €',
-      salePrice: '32.00 €',
-      category: 'Sport'
+      name: "Rolex Datejust 31 278240-0007 Mặt Số Hồng Dây Đeo Oyster",
+      brand: "Rolex",
+      image: "https://empireluxury.vn/wp-content/uploads/2022/04/dong-ho-rolex-datejust-31-278240-0007-mat-so-hong-day-deo-oyster-1.jpg",
+      rating: 4.8,
+      price: 600.20
     },
     {
       id: 3,
-      name: 'MTB vinyl record clock',
-      image: '/images/mtb-watch.png',
-      originalPrice: '39.00 €',
-      salePrice: '32.00 €',
-      category: 'Sport'
+      name: "Omega Sapphire OM03",
+      brand: "Omega",
+      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTtOuPmzENCWVyMWUvJmVLPzOTnfrmmjyIxFQ&s",
+      rating: 4.7,
+      reviews: 120,
+      price: 249.99
     },
     {
       id: 4,
-      name: 'MOTOGP vinyl record clock',
-      image: '/images/motogp-watch.png',
-      originalPrice: '39.00 €',
-      salePrice: '32.00 €',
-      category: 'Sport'
+      name: "Omega Aqua Terra 150m Master Co‑Axial Ladies",
+      brand: "Omega",
+      image: "https://bizweb.dktcdn.net/thumb/1024x1024/100/418/162/products/omega-seamaster-aqua-terra-150m-23158392155002-l.png?v=1651999254043",
+      rating: 5,
+      price: 590.2
     },
+    
     {
       id: 5,
-      name: 'TENNIS vinyl record clock',
-      image: '/images/tennis-watch.png',
-      originalPrice: '39.00 €',
-      salePrice: '32.00 €',
-      category: 'Sport'
+      name: "Tag Heuer Aquaracer",
+      brand: "Tag Heuer",
+      image: "https://www.giadongho.vn/images/users/images/dong-ho-tag-heuer-nu-4-mau-dong-ho-quy-phai-sang-trong%20(14).png",
+      rating: 4.9,
+      price: 100.20
     },
     {
       id: 6,
-      name: 'BASKETBALL vinyl record clock',
-      image: '/images/basketball-watch.png',
-      originalPrice: '39.00 €',
-      salePrice: '32.00 €',
-      category: 'Sport'
-    }
-  ];
+      name: "Tag Heuer Carrera Date",
+      brand: "Tag Heuer",
+      image: "https://www.giadongho.vn/images/users/images/dong-ho-tag-heuer-nu-4-mau-dong-ho-quy-phai-sang-trong%20(1).png",
+      rating: 4.9,
+      price: 300.20
+    },
 
+    
+    
+    // Add more products...
+  ];
+  
   return (
     <>
-    <Header />
-    <div className="page-wrapper">
-      <div className="category-header">
-        <div className="breadcrumb">
-          <a href="/">Home</a> / <span>Sport</span>
+      <Header />
+    <div className="container-fluid py-4">
+      {/* Hero Section */}
+      {/* <div className="bg-primary text-white py-4 mb-4">
+        <div className="container">
+          <h1 className="display-4">Women's Watches</h1>
+          <p className="lead">Discover our collection of premium timepieces for men</p>
         </div>
-        <h1>Sport</h1>
-      </div>
+        
+      </div> */}
 
-      <div className="container">
-        <div className="filter-section">
-          <div className="showing-results">
-            Showing all {watches.length} results
-          </div>
-          <div className="sort-options">
-            <select className="sort-select">
-              <option value="default">Default sorting</option>
-              <option value="popularity">Sort by popularity</option>
-              <option value="rating">Sort by average rating</option>
-              <option value="latest">Sort by latest</option>
-              <option value="price-low">Sort by price: low to high</option>
-              <option value="price-high">Sort by price: high to low</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="watchGrid">
-          {watches.map((watch) => (
-            <div key={watch.id} className="watchCard">
-              <div className="imageWrapper">
-                <img src="https://www.discoclock.com/wp-content/uploads/2020/11/DOC155-GOAAAL.jpg" alt={watch.name} className="watchImage" />
-                <div className="overlay">
-                  <button className="quickView">Quick View</button>
-                </div>
-                <span className="sale-badge">Sale!</span>
-              </div>
-              <div className="category-tag">{watch.category}</div>
-              <h3 className="watchName">{watch.name}</h3>
-              <div className="priceContainer">
-                <span className="originalPrice">{watch.originalPrice}</span>
-                <span className="salePrice">{watch.salePrice}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="shipping-info">
-          <div className="info-box">
-            <h3>5 DAYS DELIVERY in EU WITH GLS</h3>
-            <p>FREE SHIPPING FROM 59€</p>
-          </div>
-          <div className="payment-methods">
-            <h3>PAY SAFELY WITH</h3>
-            <div className="payment-icons">
-              <img src="/images/visa.png" alt="Visa" />
-              <img src="/images/mastercard.png" alt="Mastercard" />
-              <img src="/images/paypal.png" alt="PayPal" />
-              <img src="/images/bank-transfer.png" alt="Bank Transfer" />
-            </div>
-          </div>
-        </div>
-      </div>
+      <img src={bannerImage} className="img-fluid h-48 w-full object-cover" alt="Women's Watches" />
+      
+      <Listing />
+      
     </div>
     </>
   );
+  
 };
 
-export default SportsWatch;
+export default WomensWatches;

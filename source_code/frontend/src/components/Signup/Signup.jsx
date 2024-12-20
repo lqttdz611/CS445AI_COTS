@@ -1,11 +1,13 @@
-import { React, useState } from "react";
+import { React, useContext, useEffect, useState } from "react";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import image from "../../images/login-image.jpg";
 import { RxAvatar } from "react-icons/rx";
 import { Link } from "react-router-dom";
+import { MyContext } from "../../App";
 
 
 const Signup = () => {
+  const context = useContext(MyContext);
   const [visible, setVisible] = useState(false);
   const [visibleConfirm, setVisibleConfirm] = useState(false);
   const [name, setName] = useState("");
@@ -37,6 +39,9 @@ const Signup = () => {
 
     
   };
+  useEffect(() => {
+    context.setIsHeaderAFooterShow(false);
+  }, []);
 
   return (
     <div className="bg-gray-50 min-h-screen flex items-center justify-center">

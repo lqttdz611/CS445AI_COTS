@@ -93,6 +93,7 @@ const EditProduct = () => {
     });
 
     fetchAllDataFromAPI(`/api/products/${id}`).then((res) => {
+      console.log("what problems: ", res)
       setProducts(res);
       setPreviews(res?.images);
 

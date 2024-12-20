@@ -118,6 +118,14 @@ router.get("/featured", async (req, res) => {
   return res.status(200).json(productList);
 });
 
+// router.get("/brand", async (req, res) => {
+//   const productList = await Product.find({ brand: req.query.brand });
+//   if (!productList) {
+//     res.status(500).json({ success: false });
+//   }
+//   return res.status(200).json(productList);
+// });
+
 router.post("/create", async (req, res) => {
   const category = await Category.findById(req.body.category);
   if (!category) {
@@ -158,7 +166,6 @@ router.get("/", async (req, res) => {
   const totalPosts = await Product.countDocuments();
   const totalPages = Math.ceil(totalPosts / perPage);
 
-
   if (page > totalPages) {
     return res.status(404).json({ message: "Page not found!" });
   }
@@ -178,9 +185,8 @@ router.get("/", async (req, res) => {
       if (req.query.maxPrice && product.price > parseInt(+req.query.maxPrice)) {
         return false;
       }
-  
-      if (req.query.rating === 0) return false;
 
+      if (req.query.rating === 0) return false;
 
       return true;
     });
@@ -210,7 +216,6 @@ router.get("/", async (req, res) => {
       page: page,
     });
   } else {
-    
     productList = await Product.find(req.query).populate("category");
 
     // .skip((page - 1) * perPage)
@@ -223,11 +228,23 @@ router.get("/", async (req, res) => {
       productList: productList,
       totalPages: totalPages,
       page: page,
-      
     });
   }
 });
 
+router.get("/:id", async (req, res) => {
+  productEditId = req.params.id;
+
+  const product = await Product.findById(req.params.id);
+
+  if (!product) {
+    return res.status(500).json({
+      message: "The product with id given was not found!",
+    });
+  }
+
+  res.status(200).send(product);
+});
 
 router.put("/:id", async (req, res) => {
   try {
@@ -273,28 +290,6 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// router.delete("/:id", async (req, res) => {
-//   const product = await Product.findById(req.params.id);
-//   const images = product.images;
-
-//   if (images.length !== 0) {
-//     for (image of images) {
-//       fs.unlinkSync(`uploads/productsUploaded/${image}`);
-//     }
-//   }
-//   const deleteProduct = await Product.findByIdAndDelete(req.params.id);
-//   if (!deleteProduct) {
-//     return res.status(404).json({
-//       message: "product not found!",
-//       status: false,
-//     });
-//   }
-
-//   res.status(200).send({
-//     message: "the product was deleted!",
-//     status: true,
-//   });
-// });
 router.delete("/:id", async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);

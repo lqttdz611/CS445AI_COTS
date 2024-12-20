@@ -105,12 +105,21 @@ import React, { useState, useEffect, useContext } from "react";
 import { AiOutlineSearch } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import { FaMicrophone, FaShoppingBag } from "react-icons/fa";
-import { navItems } from "../../static/data";
+import { navItems, productData } from "../../static/data";
 import { MyContext } from "../../App";
+import { fetchDataFromAPI } from "../../utils/api";
 
 const Header = () => {
   const context = useContext(MyContext);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [categoryData, setCategoryData]= useState([])
+  useEffect(() => {
+    fetchDataFromAPI("/api/category/all").then((res) => {
+      console.log("data header :", res)
+      setCategoryData(res);
+    })
+
+  },[])
 
   // Handle scroll event to toggle background color
   useEffect(() => {
@@ -178,14 +187,14 @@ const Header = () => {
           </div>
 
           {/* Navigation Items */}
-          {navItems &&
-            navItems.map((item, index) => (
+          {categoryData?.length!==0 &&
+            categoryData?.map((item, index) => (
               <div className="relative flex px-6 group" key={index}>
                 <Link
-                  to={item.url}
+                  to={`/category/${item.id}`}
                   className="text-[#fff] font-[500] px-6 cursor-pointer text-lg"
                 >
-                  {item.title}
+                  {item.name}
                 </Link>
               </div>
             ))}

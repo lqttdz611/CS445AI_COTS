@@ -33,7 +33,7 @@ const HomePage = () => {
   return (
 
     <div className='bg-gray-50'>
-      <Header/>
+      {/* <Header/> */}
       <Hero/>
 
       <section className="homeProducts">
