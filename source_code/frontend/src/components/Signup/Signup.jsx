@@ -4,6 +4,7 @@ import image from "../../images/login-image.jpg";
 import { RxAvatar } from "react-icons/rx";
 import { Link } from "react-router-dom";
 import { MyContext } from "../../App";
+import { postDataSign } from "../../utils/api";
 
 
 const Signup = () => {
@@ -12,20 +13,18 @@ const Signup = () => {
   const [visibleConfirm, setVisibleConfirm] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [Confirmpassword, setConfirmPassword] = useState("");
-  const [avatar, setAvatar] = useState(null);
+
   const [errorMessage, setErrorMessage] = useState("");
 
-  const handleFileInputChange = (e) => {
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      if (reader.readyState === 2) {
-        setAvatar(reader.result);
-      }
-    };
-    reader.readAsDataURL(e.target.files[0]);
+  const onChangeInput = (e) => {
+    setFormFields(() => ({
+      ...formFields,
+      [e.target.name]: e.target.value,
+    }));
   };
 
   const handleMatch = () => {
@@ -33,10 +32,85 @@ const Signup = () => {
       setErrorMessage("Passwod and confirm password should be the same");
     }
   };
+  const [formFields, setFormFields] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+    isAdmin: false,
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    // console.log(formFields);
+    try {
+      if (formFields.name === "") {
+        context.setAlertBox({
+          open: true,
+          error: true,
+          msg: "Name can not be blank!",
+        });
+        return false;
+      }
+      if (formFields.email === "") {
+        context.setAlertBox({
+          open: true,
+          error: true,
+          msg: "email can not be blank!",
+        });
+        return false;
+      }
+      if (formFields.phone === "") {
+        context.setAlertBox({
+          open: true,
+          error: true,
+          msg: "Phone can not be blank!",
+        });
+        return false;
+      }
+      if (formFields.password === "") {
+        context.setAlertBox({
+          open: true,
+          error: true,
+          msg: "Password can not be blank!",
+        });
+        return false;
+      }
+      if (formFields.confirmPassword === "") {
+        context.setAlertBox({
+          open: true,
+          error: true,
+          msg: "Confirm password can not be blank!",
+        });
+        return false;
+      }
+      setIsLoading(true);
+      postDataSign("/api/user/sign-up", formFields).then((res) => {
+        console.log(res);
+        if (res.error !== true) {
+          context.setAlertBox({
+            open: true,
+            error: false,
+            msg: "Register Successfully",
+          });
+          setTimeout(() => {
+            setIsLoading(true);
+            // history("/sign-in");
+            window.location.href="/sign-in";
+          }, 2000);
+        } else {
+          setIsLoading(false);
+          context.setAlertBox({
+            open: true,
+            error: true,
+            msg: res.msg,
+          });
+        }
+      });
+    } catch (error) {
+      console.log(error);
+    }
     
   };
   useEffect(() => {
@@ -62,10 +136,9 @@ const Signup = () => {
               <div className="mt-1">
                 <input
                   type="text"
-                  name="fullName"
+                  name="name"
                   autoComplete="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={onChangeInput}
                   required
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
@@ -83,8 +156,26 @@ const Signup = () => {
                   type="email"
                   name="email"
                   autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={onChangeInput}
+                  required
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Phone
+              </label>
+              <div className="mt-1">
+                <input
+                  type="text"
+                  name="phone"
+                  autoComplete="phone"
+                  onChange={onChangeInput}
                   required
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
@@ -102,8 +193,8 @@ const Signup = () => {
                   type={visible ? "text" : "password"}
                   name="password"
                   autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+
+                  onChange={onChangeInput}
                   required
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
@@ -135,8 +226,7 @@ const Signup = () => {
                   type={visible ? "text" : "password"}
                   name="confirmPassword"
                   autoComplete="new-password"
-                  value={Confirmpassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={onChangeInput}
                   required
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
@@ -166,7 +256,7 @@ const Signup = () => {
                 htmlFor="avatar"
                 className="block text-sm font-medium text-gray-700"
               ></label>
-              <div className="mt-2 flex items-center">
+              {/* <div className="mt-2 flex items-center">
                 <span className="inline-block h-8 w-8 rounded-full overflow-hidden">
                   {avatar ? (
                     <img
@@ -193,12 +283,13 @@ const Signup = () => {
                     className="sr-only"
                   />
                 </label>
-              </div>
+              </div> */}
             </div>
 
             <button
               className="bg-[#002D74] text-white py-2 rounded-xl hover:scale-105 duration-300 text-sm mt-2"
               onClick={handleMatch}
+              type="submit"
             >
               Đăng Ký
             </button>
@@ -207,7 +298,7 @@ const Signup = () => {
           <div className="mt-4 text-sm flex justify-between items-center">
             <p>Đã có một tài khoản?</p>
             <Link
-              to="/login"
+              to="/sign-in"
               className="py-2 px-5 bg-white border rounded-xl hover:scale-110 duration-300"
             >
               Đăng Nhập

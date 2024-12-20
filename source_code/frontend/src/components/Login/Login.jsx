@@ -4,14 +4,87 @@ import { FcGoogle } from "react-icons/fc";
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { Link } from "react-router-dom";
 import { MyContext } from "../../App";
+import { postDataSign } from "../../utils/api";
 
 const Login = () => {
   const context = useContext(MyContext);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [formFields, setFormFields] = useState({
+    email: "",
+    password: "",
+  });
+  const onChangeInput = (e) => {
+    setFormFields(() => ({
+      ...formFields,
+      [e.target.name]: e.target.value,
+    }));
+  };
+  const signIn = (e) => {
+    e.preventDefault();
+    if (formFields.email === "") {
+      context.setAlertBox({
+        open: true,
+        error: true,
+        msg: "Email can not be blank!",
+      });
+      return false;
+    }
+    if (formFields.password === "") {
+      context.setAlertBox({
+        open: true,
+        error: true,
+        msg: "Password can not be blank!",
+      });
+      return false;
+    }
+    setIsLoading(true);
+
+    postDataSign("/api/user/sign-in", formFields).then((res) => {
+      try {
+        console.log(res);
+
+        if (res.error !== true) {
+          localStorage.setItem("token", res.token);
+          const user = {
+            userId: res.user.id,
+            name: res.user?.name,
+            email: res.user?.email,
+          };
+          localStorage.setItem("user", JSON.stringify(user));
+
+          context.setAlertBox({
+            open: true,
+            error: false,
+            msg: "User Login Successfully",
+          });
+          setTimeout(() => {
+            // history("/dashboard");
+            window.location.href = "/";
+
+            setIsLoading(true);
+          }, 2000);
+        } else {
+          setIsLoading(false);
+          context.setAlertBox({
+            open: true,
+            error: true,
+            msg: res.msg,
+          });
+        }
+      } catch (error) {
+        console.log(error);
+        setIsLoading(false);
+      }
+    });
+  };
+  
   useEffect(() => {
     context.setIsHeaderAFooterShow(false);
   }, []);
     const [visible,setVisible] = useState(null);
   return (
+    <>
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="bg-gray-100 flex rounded-2xl shadow-lg max-w-4xl p-5 ">
         <div className="md:w-1/2 px-16">
@@ -21,7 +94,7 @@ const Login = () => {
             Nếu bạn đã là thành viên, hãy đăng nhập
             </p>
           </div>
-          <form action="" className="">
+          <form onSubmit={signIn} className="">
             <div className="mt-4">
               <label
                 htmlFor="email"
@@ -33,6 +106,7 @@ const Login = () => {
                 <input
                   type="email"
                   name="email"
+                  onChange={onChangeInput}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
               </div>
@@ -47,6 +121,7 @@ const Login = () => {
                   <input
                     type={visible? "text" : "password"}
                     name="password"
+                    onChange={onChangeInput}
                     className="apprarance-none w-full px-3 py-2 border boder-gray-700 rounded-md shadow-sm  placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   />
                   {visible? <AiOutlineEye className="absolute right-2 top-2 cursor-pointer" size={20}
@@ -56,7 +131,7 @@ const Login = () => {
               </div>
             </div>
             <div className="mt-3 flex justify-between items-center">
-              <div className="flex items-center">
+              {/* <div className="flex items-center">
                 <input
                   type="checkbox"
                   name="remember-me"
@@ -68,17 +143,17 @@ const Login = () => {
                 >
                   Nhớ Tài Khoản
                 </label>
-              </div>
+              </div> */}
               <div className="text-sm">
                 <a
-                  href=".forgot-password"
+                  href="#"
                   className="font-medium text-blue-600 hover:text-blue-500"
                 >
                   Quên Mật Khẩu ?
                 </a>
               </div>
             </div>
-            <button className="w-full py-2 bg-[#002D74] mt-5 rounded-xl text-[#fff] hover:scale-105 duration-300 text-sm">
+            <button type="submit" className="w-full py-2 bg-[#002D74] mt-5 rounded-xl text-[#fff] hover:scale-105 duration-300 text-sm">
               Đăng nhập
             </button>
 
@@ -105,6 +180,7 @@ const Login = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

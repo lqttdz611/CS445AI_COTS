@@ -1605,3 +1605,17 @@ a:hover {
   transform: rotate(45deg);
   width: 29px
 }
+.circleButton {
+  align-items: center;
+  justify-content: center;
+  height: 40px !important;
+  min-width: 40px !important;
+  width: 40px !important;
+  border-radius: 50% !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  color: #111;
+}
+.circleButton svg {
+  font-size: 25px;
+  color: #111;
+}

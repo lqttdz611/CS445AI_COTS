@@ -7,7 +7,6 @@ import { MdOutlineDelete } from "react-icons/md";
 const CartProduct = () => {
   return (
     <div>
-      <Header />
       <div className="m-10">
       <div className="mb-3">
       <Link to="/" className="text-blue-600 text-lg font-semibold underline">Trang chủ / giỏ hàng</Link>
@@ -138,7 +137,7 @@ const CartProduct = () => {
           </div>
         </div>
       </div>
-      <Footer />
+
     </div>
   );
 };

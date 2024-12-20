@@ -8,7 +8,7 @@ import { IoList } from "react-icons/io5";
 import { FaUserEdit } from "react-icons/fa";
 import { IoLogOutOutline } from "react-icons/io5";
 import { MyContext } from "../../App";
-
+import { FaClipboardCheck } from "react-icons/fa6";
 const SideBar = () => {
   const [isActive, setIsActive] = useState(null);
   const [showProduct, setShowProduct] = useState(false);
@@ -128,6 +128,17 @@ const SideBar = () => {
                 <FaUserEdit />
               </span>
               &nbsp;Users
+            </Button>
+          </Link>
+        </li>
+
+        <li>
+          <Link to="/">
+            <Button className={isActive === 4 ? "w-100 active" : "w-100"} onClick={() => handleActive(4)}>
+              <span className="icon">
+              <FaClipboardCheck />
+              </span>
+              &nbsp;Orders
             </Button>
           </Link>
         </li>

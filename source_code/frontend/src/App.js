@@ -25,6 +25,7 @@ import Footer from "./components/Layout/Footer";
 import ProductDetails from "./pages/ProductDetails";
 const MyContext = createContext();
 function App() {
+  const [isLogin, setIsLogin] = useState(false);
   const [productData, setProductData] = useState([]);
   const [categoryData, setCategoryData] = useState([]);
   const [brandData, setBrandData] = useState([]);
@@ -42,6 +43,21 @@ function App() {
       open: false,
     });
   };
+  const [user, setUser] = useState({
+    name: "",
+    email: "",
+    userId: "",
+  });
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token !== null && token !== "") {
+      setIsLogin(true);
+      const userData = JSON.parse(localStorage.getItem("user"));
+      setUser(userData);
+    } else {
+      setIsLogin(false);
+    }
+  }, [isLogin]);
   const [isHeaderAFooterShow, setIsHeaderAFooterShow] = useState(true);
   useEffect(() => {
     fetchDataFromAPI("/api/category").then((res) => {
@@ -72,6 +88,10 @@ function App() {
     setIsHeaderAFooterShow,
     brandData,
     setBrandData,
+    isLogin,
+    setIsLogin,
+    user,
+    setUser,
   };
   return (
     <BrowserRouter>
