@@ -1,4 +1,5 @@
 const { Category } = require("../models/category");
+const { RelatedProducts } = require("../models/relatedProducts");
 const { Product } = require("../models/products");
 const express = require("express");
 const router = express.Router();
@@ -174,10 +175,9 @@ router.get("/", async (req, res) => {
 
   if (req.query.minPrice !== undefined && req.query.maxPrice !== undefined) {
     productList = await Product.find({
-      subCateId: req.query.subCateId,
-    }).populate("category subCate");
+      brand: req.query.brand?.trim(),
+    }).populate("category");
 
-    console.log("data", productList);
     const filteredProducts = productList.filter((product) => {
       if (req.query.minPrice && product.price < parseInt(+req.query.minPrice)) {
         return false;
@@ -259,7 +259,6 @@ router.put("/:id", async (req, res) => {
         category: req.body.category,
         cateName: req.body.cateName,
         cateId: req.body.cateId,
-        subCate: req.body.subCate,
         countInStock: req.body.countInStock,
         rating: req.body.rating,
         discount: req.body.discount,
@@ -347,5 +346,64 @@ router.delete("/:id", async (req, res) => {
     res.status(500).json({ message: "Internal server error", status: false });
   }
 });
+
+router.post("/relatedProducts", async (req, res) => {
+  try {
+    console.log(req.body);
+    // Kiểm tra sản phẩm có tồn tại bằng name và category (hoặc các trường phù hợp)
+    let findProduct = await RelatedProducts.findOne({
+      name: req.body.name,
+      category: req.body.category,
+    });
+
+    if (!findProduct) {
+      // Nếu không tồn tại, tạo sản phẩm mới
+      let product = new RelatedProducts({
+        recentId: req.body.id,
+        name: req.body.name,
+        description: req.body.description,
+        images: req.body.images || [],
+        brand: req.body.brand,
+        price: req.body.price,
+        oldPrice: req.body.oldPrice,
+        category: req.body.category,
+        cateName: req.body.cateName,
+        cateId: req.body.cateId,
+        countInStock: req.body.countInStock,
+        rating: req.body.rating,
+        isFeatured: req.body.isFeatured,
+        discount: req.body.discount,
+      });
+
+      product = await product.save(); // Lưu sản phẩm mới
+      return res.status(201).json(product); // Trả về sản phẩm vừa tạo
+    }
+
+    // Nếu sản phẩm đã tồn tại, trả về sản phẩm đó
+    res.status(200).json({
+      message: "Product already exists",
+      product: findProduct,
+    });
+  } catch (err) {
+    console.error("Error creating related product:", err);
+    res.status(500).json({
+      error: err.message,
+      success: false,
+    });
+  }
+});
+router.get("/recentlyView", async(req,res) => {
+  let productList = [];
+  productList = await RelatedProducts.find(req.query).populate("category subCate");
+  if(!productList) {
+    res.status(500).json({
+      success:false
+    })
+  }
+  return res.status(200).json({
+    "productList": productList,
+    
+  })
+})
 
 module.exports = router;

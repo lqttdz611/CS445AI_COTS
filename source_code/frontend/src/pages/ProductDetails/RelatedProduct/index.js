@@ -5,12 +5,13 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import {Navigation }from "swiper/modules";
 import ProductItem from '../../../components/ProductItem';
 
-const RelatedProduct = () => {
+const RelatedProduct = (props) => {
+
   return (
     <>
     <div className="d-flex align-items-center mt-3 mb-4">
                 <div className="info w-75 ">
-                  <h3 className="mb-0 hd">Related Product</h3>
+                  <h3 className="mb-0 hd">{props.title}</h3>
                   
                 </div>
 
@@ -28,24 +29,14 @@ const RelatedProduct = () => {
                   modules={[Navigation]}
                   className="mySwiper"
                 >
-                  <SwiperSlide>
-                    <ProductItem />
-                  </SwiperSlide>
-                  <SwiperSlide>
-                    <ProductItem />
-                  </SwiperSlide>
-                  <SwiperSlide>
-                    <ProductItem />
-                  </SwiperSlide>
-                  <SwiperSlide>
-                    <ProductItem />
-                  </SwiperSlide>
-                  <SwiperSlide>
-                    <ProductItem />
-                  </SwiperSlide>
-                  <SwiperSlide>
-                    <ProductItem />
-                  </SwiperSlide>
+                   {props?.relatedProduct?.length !== 0 &&
+            props?.relatedProduct?.map((item, index) => {
+              return (
+                <SwiperSlide key={index}>
+                  <ProductItem dataProduct={item} itemView={props.itemView} />
+                </SwiperSlide>
+              );
+            })}
                 </Swiper>
               </div></>
   )

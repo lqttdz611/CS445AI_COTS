@@ -34,20 +34,25 @@ const Listing = () => {
       console.log("test data", productData, id);
     });
   }, [id]);
-  const filterBrand = (id) => {
-    fetchDataFromAPI(`/api/products?cateId=${id}`).then((res) => {});
+  const filterBrand = (brand) => {
+    fetchDataFromAPI(`/api/products?brand=${brand}`).then((res) => {
+      setProductData(res.productList);
+    });
   };
-  const filterByPrice = (price) => {
+  const filterByPrice = (price, brand) => {
     fetchDataFromAPI(
-      `/api/products?minPrice=${price[0]}&maxPrice=${+price[1]}}`
+      `/api/products?minPrice=${price[0]}&maxPrice=${+price[1]}&brand=${brand}`
     ).then((res) => {
+      console.log("price: ...",res)
       setProductData(res.productList);
     });
   };
-  const filterRating = (rating, subCateId) => {
-    fetchDataFromAPI(`/api/products?rating=${rating}`).then((res) => {
-      setProductData(res.productList);
-    });
+  const filterRating = (rating, brand) => {
+    fetchDataFromAPI(`/api/products?rating=${rating}&brand=${brand}`).then(
+      (res) => {
+        setProductData(res.productList);
+      }
+    );
   };
 
   return (
@@ -118,7 +123,6 @@ const Listing = () => {
                     />
                   );
                 })}
-                
               </div>
 
               <div className="d-flex align-items-center justify-content-center mt-5">

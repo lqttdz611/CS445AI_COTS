@@ -14,7 +14,7 @@ import WomensWatches from "./pages/Women";
 import WallClock from "./pages/WallClock/wallClock";
 import SmartWatches from "./pages/SmartWatch/smartWatch";
 import { createContext, useEffect, useState } from "react";
-import { fetchDataFromAPI } from "./utils/api";
+import { fetchDataFromAPI, postDataSign } from "./utils/api";
 import HomePage from "./pages/HomePage";
 import CoupleWatches from "./pages/Couple/couple";
 import Snackbar from "@mui/material/Snackbar";
@@ -29,6 +29,8 @@ function App() {
   const [productData, setProductData] = useState([]);
   const [categoryData, setCategoryData] = useState([]);
   const [brandData, setBrandData] = useState([]);
+  const [cartCount, setCartCount] = useState();
+  const [addingInCart, setAddingInCart] = useState(false)
   const [alertBox, setAlertBox] = useState({
     msg: "",
     error: false,
@@ -58,6 +60,8 @@ function App() {
       setIsLogin(false);
     }
   }, [isLogin]);
+
+
   const [isHeaderAFooterShow, setIsHeaderAFooterShow] = useState(true);
   useEffect(() => {
     fetchDataFromAPI("/api/category").then((res) => {
@@ -76,7 +80,41 @@ function App() {
   setBrandData(uniqueBrandNames);
       
     });
+    fetchDataFromAPI("/api/cart").then((res) => {
+      setCartCount(res);
+    })
   }, []);
+  const getCartCount = () => {
+    fetchDataFromAPI("/api/cart").then((res) => {
+      setCartCount(res);
+    })
+  }
+  const addToCart = (data) => {
+    setAddingInCart(true);
+    if(isLogin !== true) alert("You need login to add to Cart");
+    postDataSign(`/api/cart/add`,data).then((res) => {
+      if(res.status !==false) {
+        setAlertBox({
+          msg:"Product is added to the CART",
+          error: false,
+          open: true
+        })
+        
+      getCartCount();  
+      } else {
+        setAlertBox({
+          msg:res.msg,
+          error: true,
+          open: true
+        })
+        setTimeout(() => {
+          setAddingInCart(false)
+        }, 1000);
+      }
+    })
+        
+
+  }
 
   const values = {
     productData,
@@ -92,6 +130,12 @@ function App() {
     setIsLogin,
     user,
     setUser,
+    addToCart,
+    cartCount,
+    setCartCount,
+    getCartCount,
+    addingInCart,
+    setAddingInCart
   };
   return (
     <BrowserRouter>

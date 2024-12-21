@@ -1,5 +1,5 @@
 import Tooltip from "@mui/material/Tooltip";
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Rating from "@mui/material/Rating";
 import ProductZoom from "../../components/ProductZoom";
 import Button from "@mui/material/Button";
@@ -9,8 +9,13 @@ import QuantityBox from "../../components/QuantityBox";
 import { IoMdCart } from "react-icons/io";
 import Stack from "@mui/material/Stack";
 import RelatedProduct from "./RelatedProduct";
+import { MyContext } from "../../App";
+import { fetchDataFromAPI, postData } from "../../utils/api";
+import { useParams } from "react-router-dom";
 
 const ProductDetails = () => {
+  const context = useContext(MyContext);
+
   const getTime = new Date().toLocaleDateString();
   const [activeSize, setActiveSize] = useState(null);
 
@@ -23,24 +28,81 @@ const ProductDetails = () => {
   // const isActiveTab = (index) => {
   //   setActiveTabs(index);
   // }
+  const { id } = useParams();
+  const [productData, setProductData] = useState([]);
+  const [relatedProductData, setRelatedProductData] = useState([]);
+  const [recentlyViewData, setRecentlyViewData] = useState([]);
+  
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    setActiveSize(null);
+    fetchDataFromAPI(`/api/products/${id}`).then((res) => {
+      setProductData(res);
+      console.log("data...", res);
+
+      fetchDataFromAPI(`/api/products?cateId=${res?.cateId}`).then((resp) => {
+        const filteredData = resp?.productList?.filter(
+          (item) => item._id !== id
+        );
+        setRelatedProductData(filteredData);
+      });
+
+      // if (!recentlyViewData.some((product) => product._id === id)) {
+      // Gọi API thêm sản phẩm
+
+      postData("/api/products/relatedProducts", res).then(() => {
+        // fetchDataFromAPI(`/api/products/recentlyView`).then((response) => {
+        //   setRecentlyViewData(response?.productList);
+        //   console.log("recently viewwww",response);
+        // });
+      });
+
+      // }
+    });
+  }, [id]);
+
+  let [cartFields, setCartFields] = useState({});
+  const [productQuantity, setProductQuantity] = useState();
+  const quantity = (number) => {
+    setProductQuantity(number);
+
+  };
+  const addToCart = () => {
+    
+      const user = JSON.parse(localStorage.getItem("user"));
+      cartFields.productTitle = productData?.name;
+      cartFields.image = productData?.images[0];
+      cartFields.rating = productData?.rating;
+      cartFields.price = productData?.price;
+      cartFields.quantity = productQuantity;
+      cartFields.subTotal = parseInt(productQuantity * productData?.price);
+      cartFields.productId = productData?.id;
+      cartFields.userId = user?.userId;
+      context.addToCart(cartFields);
+      console.log("data card field: ", cartFields);
+    
+  };
+  const selectedItem = () => {};
+
   return (
     <>
       <section className="productDetails section">
         <div className="container">
           <div className="row">
             <div className="col-md-4">
-              <ProductZoom />
+              <ProductZoom
+                images={productData?.images}
+                discount={productData?.discount}
+              />
             </div>
             <div className="col-md-7">
-              <h2 className="hd text-capitalize">
-                All Natural Italian-Style Chicken Meatballs
-              </h2>
+              <h2 className="hd text-capitalize">{productData?.name}</h2>
 
               <ul className="list list-inline d-flex align-items-center">
                 <li className="list-inline-item">
                   <div className="d-flex align-items-center">
                     <span className="text-lighter mr-2">Brands: </span>
-                    <span>Welch's</span>
+                    <span>{productData?.brand}</span>
                   </div>
                 </li>
                 <li className="list-inline-item">
@@ -48,7 +110,7 @@ const ProductDetails = () => {
                     <Rating
                       className="mr-2"
                       name="read-only size-small"
-                      value={4}
+                      value={`${productData?.rating}`}
                       size="small"
                       precision={0.5}
                       readOnly
@@ -65,67 +127,23 @@ const ProductDetails = () => {
               </ul>
 
               <div class="d-flex info mb-3">
-                <span class="oldPrice ">$20.00</span>
-                <span class="netPrice text-danger ml-2">$14.00</span>
+                <span class="oldPrice ">${productData?.oldPrice}</span>
+                <span class="netPrice text-danger ml-2">
+                  ${productData?.price}
+                </span>
               </div>
 
-              <span class="badge bg-success">IN STOCK</span>
+              <span class="badge bg-success">{`${
+                productData?.countInStock >= 1
+                  ? "In stock (" + productData?.countInStock + ")"
+                  : "Sold out"
+              } `}</span>
 
-              <p className="mt-3 mb-4">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua. Tom
-                lai la 2 chai coca nhu moi khi trong tuan!
-              </p>
-
-              <div className="productSize d-flex align-items-center">
-                <span> Size: </span>
-                <ul className="list list-inline mb-0 pl-4">
-                  <li className="list-inline-item">
-                    <a
-                      className={`tag ${activeSize === 0 ? "active" : ""}`}
-                      onClick={() => isActive(0)}
-                    >
-                      50g
-                    </a>
-                  </li>
-                  <li className="list-inline-item">
-                    <a
-                      className={`tag ${activeSize === 1 ? "active" : ""} `}
-                      onClick={() => isActive(1)}
-                    >
-                      100g
-                    </a>
-                  </li>
-                  <li className="list-inline-item">
-                    <a
-                      className={`tag ${activeSize === 2 ? "active" : ""}`}
-                      onClick={() => isActive(2)}
-                    >
-                      200g
-                    </a>
-                  </li>
-                  <li className="list-inline-item">
-                    <a
-                      className={`tag ${activeSize === 3 ? "active" : ""}`}
-                      onClick={() => isActive(3)}
-                    >
-                      300g
-                    </a>
-                  </li>
-                  <li className="list-inline-item">
-                    <a
-                      className={`tag ${activeSize === 4 ? "active" : ""}`}
-                      onClick={() => isActive(4)}
-                    >
-                      500g
-                    </a>
-                  </li>
-                </ul>
-              </div>
+              <p className="mt-3 mb-4">{productData?.description}</p>
 
               <div className="d-flex align-items-center mt-3">
-                <QuantityBox />
-                <Button className="btn-blue btn-lg btn-big btn-round ml-2 btnActions">
+                <QuantityBox quantity={quantity} selectedItem={selectedItem}  />
+                <Button className="btn-blue btn-lg btn-big btn-round ml-2 btnActions" onClick={()=> addToCart()}>
                   {" "}
                   <IoMdCart />
                   &nbsp;Add to Cart
@@ -425,9 +443,18 @@ const ProductDetails = () => {
             </div>
           </div>
 
-
           <br />
-          <RelatedProduct />
+          {relatedProductData?.length !== 0 && (
+            <RelatedProduct
+              title="RELATED PRODUCTS"
+              relatedProduct={relatedProductData}
+            />
+          )}
+          <RelatedProduct
+            title="RECENTLY VIEWS PRODUCTS"
+            // itemView={"recentlyView"}
+            // relatedProduct={recentlyViewData}
+          />
         </div>
       </section>
     </>

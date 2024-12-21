@@ -1,98 +1,72 @@
 import Slider from "react-slick";
 import InnerImageZoom from "react-inner-image-zoom";
-import React, { useContext, useRef } from "react";
+import { Navigation } from 'swiper/modules';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import React, { useContext, useRef, useState } from "react";
 
-const ProductZoom = () => {
+const ProductZoom = (props) => {
+  
+  const [slideIndex, setSlideIndex] = useState();
   const zoomSliderBig = useRef();
   const zoomSlider = useRef();
-  var settings = {
-    dots: false,
-    infinite: false,
-    speed: 500,
-    slidesToShow: 3,
-    slidesToScroll: 1,
-    fade: false,
-    arrows: true,
-  };
+
 
   const goto = (index) => {
-    zoomSlider.current.slickGoTo(index);
-    zoomSliderBig.current.slickGoTo(index);
-  }
-
-  var settings2 = {
-    dots: false,
-    infinite: false,
-    speed: 700,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    fade: false,
-    arrows: false,
+    zoomSlider.current.swiper.slideTo(index);
+    zoomSliderBig.current.swiper.slideTo(index);
   };
-  return(
+
+
+  return (
     <>
-    
-    <div className="productZoom">
-    <div className="productZoom position-relative">
-              <div className="badge badge-primary">
-                23%
-              </div>
-              <Slider
-                {...settings2}
-                className="zoomSliderBig"
-                ref={zoomSliderBig}
-              >
-                <div className="item">
-                  <InnerImageZoom
-                    zoomType="hover"
+      <div className="productZoom">
+        <div className="productZoom productZoomBig position-relative mb-2">
+          <div className="badge badge-primary">{props.discount}%</div>
+          
+          <Swiper
+          slidesPerView={1}
+          spaceBetween={0}
+          navigation={false} slidesPerGroup={1} modules={[Navigation]} className="zoomSliderBig" ref={zoomSliderBig}>
+            {
+              props.images?.map((item,index) => {
+                return( 
+                  <SwiperSlide key={index}>
+                  <div className="item">
+                    <InnerImageZoom
+                    zoomType="hover" 
                     zoomScale={1}
-                    src="https://klbtheme.com/bacola/wp-content/uploads/2021/04/product-image-62.jpg"
-                  />
-                </div>
-                <div className="item">
-                  <InnerImageZoom
-                    zoomType="hover"
-                    zoomScale={1}
-                    src="https://klbtheme.com/bacola/wp-content/uploads/2021/04/product-image2-47.jpg"
-                  />
-                </div>
-                <div className="item">
-                  <InnerImageZoom
-                    zoomType="hover"
-                    zoomScale={1}
-                    src="https://klbtheme.com/bacola/wp-content/uploads/2021/04/product-image3-35.jpg"
-                  />
-                </div>
-              </Slider>
-            </div>
+                    src={item} >
+                    </InnerImageZoom>
+                  </div>
+                  </SwiperSlide>
+                )
+              })
+            }
 
-            <Slider {...settings} className="zoomSlider" ref={zoomSlider}>
-              <div className="item">
-                <img
-                  src="https://klbtheme.com/bacola/wp-content/uploads/2021/04/product-image-62.jpg"
-                  className="w-100"
-                  onClick={() => goto(0)}
-                ></img>
-              </div>
+          </Swiper>
+        </div>
 
-              <div className="item">
-                <img
-                  src="https://klbtheme.com/bacola/wp-content/uploads/2021/04/product-image2-47.jpg"
-                  className="w-100"
-                  onClick={() => goto(1)}
-                ></img>
-              </div>
+        <Swiper slidesPerView={5} spaceBetween={0} navigation={true}
+        slidesPerGroup={1}  modules={[Navigation]} className="zoomSlider" ref={zoomSlider}
+        >
+           {
+              props.images?.map((item,index) => {
+                return( 
+                  <SwiperSlide>
+                  <div className={`item ${slideIndex === index && 'item_active'}`} key={index}>
+                    <img src={item} className="w-100"
+                    onClick={() => goto(index)} />
+                  </div>
+                  </SwiperSlide>
+                )
+              })
+            }
 
-              <div className="item">
-                <img
-                  src="https://klbtheme.com/bacola/wp-content/uploads/2021/04/product-image3-35.jpg"
-                  className="w-100"
-                  onClick={() => goto(2)}
-                ></img>
-              </div>
-            </Slider>
-    </div>
+        </Swiper>
+      </div>
     </>
-  )
-}
+  );
+};
 export default ProductZoom;

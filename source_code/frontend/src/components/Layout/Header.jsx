@@ -8,7 +8,46 @@ import { MyContext } from "../../App";
 import { fetchDataFromAPI } from "../../utils/api";
 import { FaRegUser } from "react-icons/fa";
 import { Button } from "@mui/material";
+import Avatar from "@mui/material/Avatar";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import Divider from '@mui/material/Divider';
+import { PiListHeartBold } from "react-icons/pi";
+import Tooltip from "@mui/material/Tooltip";
+import { FaCartArrowDown } from "react-icons/fa6";
+import Settings from "@mui/icons-material/Settings";
+import { useNavigate } from "react-router-dom";
+import Logout from "@mui/icons-material/Logout";
 const Header = () => {
+  const history = useNavigate()
+
+
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+
+  
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  const handleLogout = () => {
+    setAnchorEl(null);
+    localStorage.clear();
+
+    context.setIsLogin(false)
+    setAnchorEl(null)
+    context.setAlertBox({
+      open: true,
+      error: false,
+      msg: "Logout successfully"
+    })
+    setTimeout(() => {
+      history("/sign-in")
+    }, 2000);
+  }
   const context = useContext(MyContext);
   const [isScrolled, setIsScrolled] = useState(false);
   const [categoryData, setCategoryData]= useState([])
@@ -62,7 +101,7 @@ const Header = () => {
               <FaShoppingBag size={25} className="ml-3" />
             </Link>
             <span className="absolute bg-red-700 rounded-full h-5 w-5 flex items-center justify-center text-white font-medium right-2 top-[30px]">
-              2
+            {context.cartCount?.length}
             </span>
           </div>
         </div>
@@ -104,9 +143,76 @@ const Header = () => {
               <button className="w-[150px] bg-[#FFBB38] h-[50px] flex items-center justify-center rounded-xl cursor-pointer font-medium text-black text-lg">
                 Đăng Nhập
               </button>
-            </Link>) : (<Button className="circleButton mr-3">
-                    <FaRegUser />
-                  </Button>)
+            </Link>) :  <>
+                      <Tooltip title="Account settings">
+                        <Button className="circleButton mr-3" onClick={handleClick}>
+                          <FaRegUser />
+                        </Button>
+                      </Tooltip>
+                      <Menu
+        anchorEl={anchorEl}
+        id="accountDrop"
+        open={open}
+        onClose={handleClose}
+        onClick={handleClose}
+        slotProps={{
+          paper: {
+            elevation: 0,
+            sx: {
+              overflow: 'visible',
+              filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+              mt: 1.5,
+              '& .MuiAvatar-root': {
+                width: 32,
+                height: 32,
+                ml: -0.5,
+                mr: 1,
+              },
+              '&::before': {
+                content: '""',
+                display: 'block',
+                position: 'absolute',
+                top: 0,
+                left: 14,
+                width: 10,
+                height: 10,
+                bgcolor: 'background.paper',
+                transform: 'translateY(-50%) rotate(45deg)',
+                zIndex: 0,
+              },
+            },
+          },
+        }}
+        transformOrigin={{ horizontal: 'left', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
+      >
+        
+        <MenuItem onClick={handleClose}>
+          <ListItemIcon>
+          <Avatar />
+          </ListItemIcon>
+          My Account
+        </MenuItem>
+        <MenuItem onClick={handleClose}>
+          <ListItemIcon>
+          <PiListHeartBold />
+          </ListItemIcon>
+          My Whishlist
+        </MenuItem>
+        <MenuItem onClick={handleClose}>
+          <ListItemIcon>
+          <FaCartArrowDown />
+          </ListItemIcon>
+          My Orders
+        </MenuItem>
+        <MenuItem onClick={handleLogout}>
+          <ListItemIcon>
+            <Logout fontSize="small" />
+          </ListItemIcon>
+          Logout
+        </MenuItem>
+      </Menu>
+                    </>
           }
           
         </div>

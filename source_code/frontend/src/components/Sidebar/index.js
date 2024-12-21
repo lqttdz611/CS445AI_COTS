@@ -26,6 +26,11 @@ const Sidebar = (props) => {
     setValueRating(0);
   };
   useEffect(() => {
+    props.filterByPrice(value, brand);
+  }, [value])
+
+  
+  useEffect(() => {
     props.filterByRating(valueRating, brand);
   }, [valueRating])
   return (
