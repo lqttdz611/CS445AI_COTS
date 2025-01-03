@@ -1619,3 +1619,34 @@ a:hover {
   font-size: 25px;
   color: #111;
 }
+.section {
+  padding: 45px 0px;
+}
+.cartPage .table thead {
+  background-color: #ececec !important;
+  overflow: hidden;
+  white-space:nowrap;
+}
+.cartPage .table thead th {
+  border: 0px !important;
+}
+.cartPage .table thead th:first-child {
+  border-top-left-radius: 10px !important;
+  border-bottom-left-radius: 10px !important;
+}
+.cartPage .table thead th:last-child {
+  border-top-right-radius: 10px !important;
+  border-bottom-right-radius: 10px !important;
+}
+.cartPage .table td, .cartPage .table th {
+  border-bottom: 1px solid #0000001a !important;
+  border-top: 0 !important;
+}
+.cartPage table td, .cartPage table th {
+  vertical-align: middle;
+}
+@media (min-width: 1300px) {
+  .container, .container-lg, .container-md, .container-sm, .container-xl {
+      max-width: 1280px !important;
+  }
+}

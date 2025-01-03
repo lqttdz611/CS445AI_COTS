@@ -20,6 +20,7 @@ import Header from "./components/Layout/Header";
 import Footer from "./components/Layout/Footer";
 import ProductDetails from "./pages/ProductDetails";
 import WhishList from "./pages/WhishList";
+import CheckoutSuccess from "./pages/Checkout/success";
 const MyContext = createContext();
 function App() {
   const [isLogin, setIsLogin] = useState(false);
@@ -172,6 +173,7 @@ function App() {
           <Route path="/category/:id" element={<Listing />} />
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/my-list" element={<WhishList />} />
+          <Route path="/checkout-success" exact={true} element={<CheckoutSuccess />}></Route>
           
         </Routes>
         {isHeaderAFooterShow === true && <Footer />}
