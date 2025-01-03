@@ -63,12 +63,13 @@ const ProductDetails = () => {
 
   let [cartFields, setCartFields] = useState({});
   const [productQuantity, setProductQuantity] = useState();
+  const [isLoading, setIsLoading] = useState(false);
   const quantity = (number) => {
     setProductQuantity(number);
 
   };
   const addToCart = () => {
-    
+      setIsLoading(true);
       const user = JSON.parse(localStorage.getItem("user"));
       cartFields.productTitle = productData?.name;
       cartFields.image = productData?.images[0];

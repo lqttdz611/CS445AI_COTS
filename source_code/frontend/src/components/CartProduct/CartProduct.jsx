@@ -11,6 +11,7 @@ import { MyContext } from "../../App";
 import Rating from "@mui/material/Rating";
 import { deleteData, editData, fetchDataFromAPI } from "../../utils/api";
 const CartProduct = () => {
+  const user= JSON.parse(localStorage.getItem("user"));
   const context = useContext(MyContext);
   const [cartData, setCartData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -18,6 +19,7 @@ const CartProduct = () => {
   const [changeQuantity, setChangeQuantity] = useState(0);
 
   const [productQuantity, setProductQuantity] = useState();
+  const [selectedQuantity, setSelectedQuantity] = useState();
   const quantity = (number) => {
     setProductQuantity(number);
     setChangeQuantity(number)
@@ -25,11 +27,11 @@ const CartProduct = () => {
 
   useEffect(() => {
     
-    fetchDataFromAPI("/api/cart").then((res) => {
+    fetchDataFromAPI(`/api/cart?userId=${user?.userId}`).then((res) => {
       console.log("cart data + ", res)
       setCartData(res);
       // setProductQuantity(res.quantity);
-      
+      setSelectedQuantity(res?.quantity)
     })
   },[])
 
@@ -69,8 +71,9 @@ const CartProduct = () => {
         msg: 'Item removed from CART!'
       })
 
-      fetchDataFromAPI("/api/cart").then((response) => {
+      fetchDataFromAPI(`/api/cart?userId=${user?.userId}`).then((response) => {
         setCartData(response);
+        setIsLoading(false);
       })
 
       context.getCartCount();

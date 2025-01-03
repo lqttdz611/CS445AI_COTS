@@ -64,6 +64,7 @@ function App() {
 
   const [isHeaderAFooterShow, setIsHeaderAFooterShow] = useState(true);
   useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
     fetchDataFromAPI("/api/category").then((res) => {
       setCategoryData(res.categoryList);
     });
@@ -80,12 +81,14 @@ function App() {
   setBrandData(uniqueBrandNames);
       
     });
-    fetchDataFromAPI("/api/cart").then((res) => {
+    fetchDataFromAPI(`/api/cart?userId=${user?.userId}`).then((res) => {
       setCartCount(res);
     })
   }, []);
   const getCartCount = () => {
-    fetchDataFromAPI("/api/cart").then((res) => {
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    fetchDataFromAPI(`/api/cart?userId=${user?.userId}`).then((res) => {
       setCartCount(res);
     })
   }
