@@ -21,6 +21,7 @@ import { fetchDataFromAPI } from "./utils/api";
 // import EditProduct from "./pages/Products/editProduct";
 import CategoryEdit from "./pages/Categories/editCategory";
 import EditProduct from "./pages/Products/editProduct";
+import Orders from "./pages/Orders";
 const MyContext = createContext();
 function App() {
   // for notification bottom left corner
@@ -188,6 +189,11 @@ function App() {
                   path={"/product/edit/:id"}
                   exact={true}
                   element={<EditProduct />}
+                />
+                 <Route
+                  path={"/orders"}
+                  exact={true}
+                  element={<Orders />}
                 />
 
                 {/* <Route

@@ -7,15 +7,87 @@ import { FcGoogle } from "react-icons/fc";
 import { MyContext } from "../../App";
 import { HiMiniEyeSlash } from "react-icons/hi2";
 import { IoEyeSharp } from "react-icons/io5";
+import { postDataSign } from "../../utils/api";
+import { useNavigate } from "react-router-dom";
+import CircularProgress from "@mui/material/CircularProgress";
 const Login = () => {
   const context = useContext(MyContext);
 
-  const [isShowPassword, setIsShowPassWord] = useState(false)
+  const [isShowPassword, setIsShowPassWord] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const history = useNavigate();
+  const [formFields, setFormFields] = useState({
+    email: "",
+    password: "",
+  });
+  const onChangeInput = (e) => {
+    setFormFields(() => ({
+      ...formFields,
+      [e.target.name]: e.target.value,
+    }));
+  };
+  const signIn = (e) => {
+    e.preventDefault();
+    if (formFields.email === "") {
+      context.setAlertBox({
+        open: true,
+        error: true,
+        msg: "Email can not be blank!",
+      });
+      return false;
+    }
+    if (formFields.password === "") {
+      context.setAlertBox({
+        open: true,
+        error: true,
+        msg: "Password can not be blank!",
+      });
+      return false;
+    }
+    setIsLoading(true);
 
+    postDataSign("/api/user/sign-in", formFields).then((res) => {
+      try {
+        console.log(res);
+
+        if (res.error !== true) {
+          localStorage.setItem("token", res.token);
+          const user = {
+            userId: res.user.id,
+            name: res.user?.name,
+            email: res.user?.email,
+          };
+          localStorage.setItem("user", JSON.stringify(user));
+
+          context.setAlertBox({
+            open: true,
+            error: false,
+            msg: "User Login Successfully",
+          });
+          setTimeout(() => {
+            // history("/dashboard");
+            window.location.href = "/";
+
+            setIsLoading(true);
+          }, 2000);
+        } else {
+          setIsLoading(false);
+          context.setAlertBox({
+            open: true,
+            error: true,
+            msg: res.msg,
+          });
+        }
+      } catch (error) {
+        console.log(error);
+        setIsLoading(false);
+      }
+    });
+  };
 
   useEffect(() => {
-context.setIsHideSidebar(true);
-  },[])
+    context.setIsHideSidebar(true);
+  }, []);
   return (
     <>
       <section className="section signInPage full">
@@ -40,17 +112,17 @@ context.setIsHideSidebar(true);
             <div className="text-center">
               <img alt="Logo of website" src={Logo}></img>
             </div>
-            <form className="mt-3">
+            <form className="mt-3" onSubmit={signIn}>
               <h2 className="mb-4">Sign In</h2>
               <div className="form-group">
                 <TextField
                   id="standard-basic"
                   label="Email"
                   type="email"
-                  required
+                  name="email"
+                  onChange={onChangeInput}
                   variant="standard"
                   className="w-100"
-                  autoFocus
                 />
               </div>
 
@@ -58,17 +130,25 @@ context.setIsHideSidebar(true);
                 <TextField
                   id="standard-basic"
                   label="Password"
-                  type={isShowPassword !== true ? 'password' : 'text'}
-                  required
+                  type={isShowPassword !== true ? "password" : "text"}
+                  name="password"
+                  onChange={onChangeInput}
                   variant="standard"
                   className="w-100"
                 />
-                <span className="toggleShowPassword" onClick={() => {
-                  isShowPassword === false ? setIsShowPassWord(true) : setIsShowPassWord(false)
-                }}>
-                  {
-                    isShowPassword !==true ? <HiMiniEyeSlash /> : <IoEyeSharp />
-                  }
+                <span
+                  className="toggleShowPassword"
+                  onClick={() => {
+                    isShowPassword === false
+                      ? setIsShowPassWord(true)
+                      : setIsShowPassWord(false);
+                  }}
+                >
+                  {isShowPassword !== true ? (
+                    <HiMiniEyeSlash />
+                  ) : (
+                    <IoEyeSharp />
+                  )}
                 </span>
               </div>
 
@@ -77,14 +157,13 @@ context.setIsHideSidebar(true);
               </Link>
 
               <div className="d-flex align-items-center mt-3 mb-3">
-                <Button className="btn-blue col btn-lg btn-big">Sign In</Button>
+                <Button className="btn-blue col btn-lg btn-big" type="submit">Sign In</Button>
 
                 <Link to="/">
                   <Button
                     variant="outlined"
                     onClick={() => {
-                      context.setIsHideSidebar(false)
-
+                      context.setIsHideSidebar(false);
                     }}
                     className="btn-lg btn-big col ml-3"
                   >

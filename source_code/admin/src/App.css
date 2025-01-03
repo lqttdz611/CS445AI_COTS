@@ -1135,3 +1135,80 @@ table td .info p {
   opacity: .5;
   text-align: center;
 }
+/* order page */
+.orderTable td,.orderTable th {
+  white-space: nowrap
+}
+.orderTable .img {
+  width: 60px;
+  height: 40px;
+  overflow: hidden;
+}
+.orderTable .img img {
+  width: 100%;
+  /* height: 100%;
+  object-fit: cover; */
+}
+.tableFooter p {
+  margin-bottom: 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+.productModal h4 {
+  font-size: 20px !important;
+  color: rgba(0, 0, 0, 0.8) !important;
+}
+.productModal .actions button {
+  color: #4e4545 !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  font-size: 10px !important;
+}
+.productModal .actions button svg {
+  font-size: 15px !important;
+}
+.productModal .actions button.nonOutline {
+  border: none !important; /* No border for this button */
+}
+.productModal .productChecklist ul li {
+  list-style: none;
+  font-size: 12px;
+}
+.productModal .productChecklist ul li svg {
+  color: #16b858 !important;
+  /* width: 100%; */
+  margin-right: 10px;
+}
+.productModal .productChecklist {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding-bottom: 15px;
+}
+.productModal .MuiPaper-elevation {
+  padding: 25px;
+  position: relative;
+  max-width: 900px !important;
+  width: 900px !important;
+  overflow: auto;
+}
+.close_ {
+  background: #f1f1f1 !important;
+  border-radius: 50% !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  position: absolute !important;
+  right: 10px;
+  top: 10px;
+  width: 40px !important;
+}
+.close_, .close_ svg {
+  color: #000 !important;
+}
+.close_ svg {
+  font-size: 22px;
+  opacity: .7;
+}
+.text-blue {
+  color: #4f73e7!important
+}
+.cursor {
+  cursor: pointer;
+}

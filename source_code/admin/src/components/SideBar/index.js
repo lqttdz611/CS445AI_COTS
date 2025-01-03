@@ -9,6 +9,7 @@ import { FaUserEdit } from "react-icons/fa";
 import { IoLogOutOutline } from "react-icons/io5";
 import { MyContext } from "../../App";
 import { FaClipboardCheck } from "react-icons/fa6";
+import { useNavigate } from "react-router-dom";
 const SideBar = () => {
   const [isActive, setIsActive] = useState(null);
   const [showProduct, setShowProduct] = useState(false);
@@ -16,11 +17,17 @@ const SideBar = () => {
   const location = useLocation(); // Lấy đường dẫn URL hiện tại
 
   useEffect(() => {
-    if (location.pathname.startsWith("/products") || location.pathname.startsWith("/product")) {
+    if (
+      location.pathname.startsWith("/products") ||
+      location.pathname.startsWith("/product")
+    ) {
       setShowProduct(true);
       setShowCategory(false);
       setIsActive(1);
-    } else if (location.pathname.startsWith("/categories") || location.pathname.startsWith("/category")) {
+    } else if (
+      location.pathname.startsWith("/categories") ||
+      location.pathname.startsWith("/category")
+    ) {
       setShowCategory(true);
       setShowProduct(false);
       setIsActive(2);
@@ -57,12 +64,26 @@ const SideBar = () => {
     }
   };
 
+  const history = useNavigate();
+  const [isLogin, setIsLogin] = useState(false);
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token !== null && token !== "" && token !== undefined) {
+      setIsLogin(true);
+    } else {
+      history("/login");
+    }
+  }, []);
+
   return (
     <div className="sidebar">
       <ul>
         <li>
           <Link to="/">
-            <Button className={isActive === 0 ? "w-100 active" : "w-100"} onClick={() => handleActive(0)}>
+            <Button
+              className={isActive === 0 ? "w-100 active" : "w-100"}
+              onClick={() => handleActive(0)}
+            >
               <span className="icon">
                 <RiDashboardHorizontalFill />
               </span>
@@ -72,7 +93,10 @@ const SideBar = () => {
         </li>
 
         <li>
-          <Button className={`w-100 ${showProduct ? 'active' : ''}`} onClick={handleProduct}>
+          <Button
+            className={`w-100 ${showProduct ? "active" : ""}`}
+            onClick={handleProduct}
+          >
             <span className="icon">
               <FaProductHunt />
             </span>
@@ -81,7 +105,9 @@ const SideBar = () => {
               <IoIosArrowForward />
             </span>
           </Button>
-          <div className={`submenuWrapper ${showProduct ? 'colapse' : 'colapsed'}`}>
+          <div
+            className={`submenuWrapper ${showProduct ? "colapse" : "colapsed"}`}
+          >
             <ul className="submenu">
               <li>
                 <Link to="/products">Product List</Link>
@@ -97,7 +123,10 @@ const SideBar = () => {
         </li>
 
         <li>
-          <Button className={`w-100 ${showCategory ? 'active' : ''}`} onClick={handleCategory}>
+          <Button
+            className={`w-100 ${showCategory ? "active" : ""}`}
+            onClick={handleCategory}
+          >
             <span className="icon">
               <IoList />
             </span>
@@ -106,7 +135,11 @@ const SideBar = () => {
               <IoIosArrowForward />
             </span>
           </Button>
-          <div className={`submenuWrapper ${showCategory ? 'colapse' : 'colapsed'}`}>
+          <div
+            className={`submenuWrapper ${
+              showCategory ? "colapse" : "colapsed"
+            }`}
+          >
             <ul className="submenu">
               <li>
                 <Link to="/categories">Category List</Link>
@@ -123,7 +156,10 @@ const SideBar = () => {
 
         <li>
           <Link to="/">
-            <Button className={isActive === 3 ? "w-100 active" : "w-100"} onClick={() => handleActive(3)}>
+            <Button
+              className={isActive === 3 ? "w-100 active" : "w-100"}
+              onClick={() => handleActive(3)}
+            >
               <span className="icon">
                 <FaUserEdit />
               </span>
@@ -133,10 +169,13 @@ const SideBar = () => {
         </li>
 
         <li>
-          <Link to="/">
-            <Button className={isActive === 4 ? "w-100 active" : "w-100"} onClick={() => handleActive(4)}>
+          <Link to="/orders">
+            <Button
+              className={isActive === 4 ? "w-100 active" : "w-100"}
+              onClick={() => handleActive(4)}
+            >
               <span className="icon">
-              <FaClipboardCheck />
+                <FaClipboardCheck />
               </span>
               &nbsp;Orders
             </Button>
@@ -149,7 +188,8 @@ const SideBar = () => {
         <div className="logoutBox">
           <Link to="/login">
             <Button variant="contained">
-              <IoLogOutOutline />LOGOUT
+              <IoLogOutOutline />
+              LOGOUT
             </Button>
           </Link>
         </div>

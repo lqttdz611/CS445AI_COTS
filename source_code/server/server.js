@@ -21,6 +21,7 @@ const imageUploadRoutes = require('./routes/imageUpload')
 const userRoutes = require('./routes/user');
 const productReviewsRouter  = require('./routes/productReviews');
 const cartRoutes = require('./routes/cart');
+const ordersRoutes = require('./routes/orders');
 const whishListRoutes = require('./routes/whishList');
 // stripe
 const stripeRoutes = require('./routes/stripe');
@@ -34,6 +35,7 @@ app.use(`/api/user`, userRoutes);
 app.use(`/api/reviews`, productReviewsRouter)
 app.use(`/api/cart`, cartRoutes);
 app.use(`/api/my-list`, whishListRoutes);
+app.use(`/api/orders`, ordersRoutes)
 app.use(`/api/stripe`, stripeRoutes)
 
 // Database

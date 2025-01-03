@@ -21,6 +21,7 @@ import Footer from "./components/Layout/Footer";
 import ProductDetails from "./pages/ProductDetails";
 import WhishList from "./pages/WhishList";
 import CheckoutSuccess from "./pages/Checkout/success";
+import Orders from "./pages/Orders";
 const MyContext = createContext();
 function App() {
   const [isLogin, setIsLogin] = useState(false);
@@ -173,6 +174,7 @@ function App() {
           <Route path="/category/:id" element={<Listing />} />
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/my-list" element={<WhishList />} />
+          <Route path="/my-order" element={<Orders />} />
           <Route path="/checkout-success" exact={true} element={<CheckoutSuccess />}></Route>
           
         </Routes>
