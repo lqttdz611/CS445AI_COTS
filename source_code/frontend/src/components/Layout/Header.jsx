@@ -193,12 +193,15 @@ const Header = () => {
           </ListItemIcon>
           My Account
         </MenuItem>
+        <Link to="/my-list">
         <MenuItem onClick={handleClose}>
           <ListItemIcon>
           <PiListHeartBold />
           </ListItemIcon>
           My Whishlist
         </MenuItem>
+        </Link>
+        
         <MenuItem onClick={handleClose}>
           <ListItemIcon>
           <FaCartArrowDown />

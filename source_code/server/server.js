@@ -19,14 +19,18 @@ const categoryRoutes = require('./routes/categories')
 const productRoutes = require('./routes/products')
 const imageUploadRoutes = require('./routes/imageUpload')
 const userRoutes = require('./routes/user');
+const productReviewsRouter  = require('./routes/productReviews');
 const cartRoutes = require('./routes/cart');
+const whishListRoutes = require('./routes/whishList');
 
 app.use("/uploads",express.static("uploads"))
 app.use(`/api/category`, categoryRoutes)
 app.use(`/api/products`, productRoutes)
 app.use(`/api/imageUpload`, imageUploadRoutes)
 app.use(`/api/user`, userRoutes);
-app.use(`/api/cart`, cartRoutes)
+app.use(`/api/reviews`, productReviewsRouter)
+app.use(`/api/cart`, cartRoutes);
+app.use(`/api/my-list`, whishListRoutes);
 
 // Database
 mongoose.connect(process.env.CONNECTION_STRING, {

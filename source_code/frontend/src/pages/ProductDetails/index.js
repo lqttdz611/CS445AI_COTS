@@ -10,9 +10,10 @@ import { IoMdCart } from "react-icons/io";
 import Stack from "@mui/material/Stack";
 import RelatedProduct from "./RelatedProduct";
 import { MyContext } from "../../App";
-import { fetchDataFromAPI, postData } from "../../utils/api";
+import { fetchDataFromAPI, postData, postDataSign } from "../../utils/api";
 import { useParams } from "react-router-dom";
-
+import CircularProgress from "@mui/material/CircularProgress";
+import moment from "moment";
 const ProductDetails = () => {
   const context = useContext(MyContext);
 
@@ -29,10 +30,12 @@ const ProductDetails = () => {
   //   setActiveTabs(index);
   // }
   const { id } = useParams();
+  const user = JSON.parse(localStorage.getItem("user"));
   const [productData, setProductData] = useState([]);
   const [relatedProductData, setRelatedProductData] = useState([]);
   const [recentlyViewData, setRecentlyViewData] = useState([]);
-  
+  const [reviewsData, setReviewsData] = useState([]);
+
   useEffect(() => {
     window.scrollTo(0, 0);
     setActiveSize(null);
@@ -59,6 +62,11 @@ const ProductDetails = () => {
 
       // }
     });
+
+    fetchDataFromAPI(`/api/reviews??productId=${id}`).then((res) => {
+      setReviewsData(res);
+      console.log("data review", res);
+    });
   }, [id]);
 
   let [cartFields, setCartFields] = useState({});
@@ -66,25 +74,115 @@ const ProductDetails = () => {
   const [isLoading, setIsLoading] = useState(false);
   const quantity = (number) => {
     setProductQuantity(number);
-
   };
   const addToCart = () => {
-      setIsLoading(true);
-      const user = JSON.parse(localStorage.getItem("user"));
-      cartFields.productTitle = productData?.name;
-      cartFields.image = productData?.images[0];
-      cartFields.rating = productData?.rating;
-      cartFields.price = productData?.price;
-      cartFields.quantity = productQuantity;
-      cartFields.subTotal = parseInt(productQuantity * productData?.price);
-      cartFields.productId = productData?.id;
-      cartFields.userId = user?.userId;
-      context.addToCart(cartFields);
-      console.log("data card field: ", cartFields);
-    
+    setIsLoading(true);
+    const user = JSON.parse(localStorage.getItem("user"));
+    cartFields.productTitle = productData?.name;
+    cartFields.image = productData?.images[0];
+    cartFields.rating = productData?.rating;
+    cartFields.price = productData?.price;
+    cartFields.quantity = productQuantity;
+    cartFields.subTotal = parseInt(productQuantity * productData?.price);
+    cartFields.productId = productData?.id;
+    cartFields.userId = user?.userId;
+    context.addToCart(cartFields);
+    console.log("data card field: ", cartFields);
   };
   const selectedItem = () => {};
 
+  // review part
+  const [reviews, setReviews] = useState({
+    productId: id,
+    customerName: user?.name,
+    customerId: user?.userId,
+    review: "",
+    customerRating: "",
+  });
+
+  const onChangeInput = (e) => {
+    setReviews(() => ({
+      ...reviews,
+      [e.target.name]: e.target.value,
+    }));
+  };
+  const onChangeRating = (e) => {
+    reviews.customerRating = e.target.value;
+  };
+  const addReview = (e) => {
+    e.preventDefault();
+
+    if (reviews.review !== "" && reviews.customerRating !== 0) {
+      if (context.isLogin === true) {
+        setIsLoading(true);
+        postData("/api/reviews/add", reviews).then((res) => {
+          setReviews({
+            review: "",
+            customerRating: 0,
+          });
+          fetchDataFromAPI(`/api/reviews??productId=${id}`).then((response) => {
+            setReviewsData(response);
+          });
+          setTimeout(() => {
+            setIsLoading(false);
+            context.setAlertBox({
+              open: true,
+              error: false,
+              msg: "Add review success!",
+            });
+          }, 2000);
+        });
+      } else {
+        alert("You need to login to make a review");
+      }
+    } else {
+      context.setAlertBox({
+        open: true,
+        error: true,
+        msg: "Please fill review and rating to submit",
+      });
+    }
+  };
+
+  const addToWhishList = (id) => {
+    // e.preventDefault();
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user !== undefined && user !== null && user !== "") {
+      const data = {
+        productTitle: productData?.name,
+        image: productData?.images[0],
+        rating: productData?.rating,
+        price: productData?.price,
+        productId: productData?.id,
+        userId: user?.userId,
+      };
+
+      postDataSign(`/api/my-list/add`, data).then((res) => {
+        if (res.status !== false) {
+          context.setAlertBox({
+            msg: "Product is added to the CART",
+            error: false,
+            open: true,
+          });
+          setTimeout(() => {
+            alert("Added to whishlist");
+          }, 2000);
+        } else {
+          context.setAlertBox({
+            msg: res.msg,
+            error: true,
+            open: true,
+          });
+          setTimeout(() => {
+            alert("added to whishlist fail");
+          }, 1000);
+        }
+      });
+      // console.log("data to add: ", data);
+    } else {
+      alert("Please login to add Whishlist");
+    }
+  };
   return (
     <>
       <section className="productDetails section">
@@ -143,14 +241,25 @@ const ProductDetails = () => {
               <p className="mt-3 mb-4">{productData?.description}</p>
 
               <div className="d-flex align-items-center mt-3">
-                <QuantityBox quantity={quantity} selectedItem={selectedItem}  />
-                <Button className="btn-blue btn-lg btn-big btn-round ml-2 btnActions" onClick={()=> addToCart()}>
+                <QuantityBox quantity={quantity} selectedItem={selectedItem} />
+                <Button
+                  className="btn-blue btn-lg btn-big btn-round ml-2 btnActions"
+                  onClick={() => addToCart()}
+                >
                   {" "}
                   <IoMdCart />
-                  &nbsp;Add to Cart
+                  &nbsp;
+                  {context.addingInCart === true ? (
+                    <CircularProgress color="inherit" className="loader" />
+                  ) : (
+                    "Add to Cart"
+                  )}
                 </Button>
                 <Tooltip title="Add to Wishlist" placement="top-start">
-                  <Button className="btn-blue btn-lg btn-big btn-circle ml-4">
+                  <Button
+                    className="btn-blue btn-lg btn-big btn-circle ml-4"
+                    onClick={() => addToWhishList(productData?.id)}
+                  >
                     <FaRegHeart />
                   </Button>
                 </Tooltip>
@@ -202,7 +311,7 @@ const ProductDetails = () => {
                       setActiveTabs(2);
                     }}
                   >
-                    Reviews (5)
+                    Reviews ({reviewsData?.length})
                   </Button>
                 </li>
               </ul>
@@ -320,52 +429,49 @@ const ProductDetails = () => {
                     activeTabs === 2 ? "content active-content" : "content"
                   }
                 >
-                  <div className="row">
+                  <div
+                    className="row"
+                    style={{ maxHeight: "600px", overflowY: "auto" }}
+                  >
                     <div className="col-md-8">
                       <h3>Customer questions & answers</h3>
                       <br />
 
-                      <div className="reviewBox mb-4 border-bottom">
-                        <div className="info">
-                          <div className="d-flex align-items-center w-100">
-                            <h5>
-                              <b>Thresh</b>
-                            </h5>
-                            <div className="ml-auto">
-                              <Rating
-                                name="read-only"
-                                value={5}
-                                size="small"
-                                precision={0.5}
-                                readOnly
-                              />
-                            </div>
-                          </div>
-                          <h6 className="text-light">{getTime}</h6>
-                          <p>Test about comment</p>
-                        </div>
-                      </div>
-
-                      <div className="reviewBox mb-4 border-bottom">
-                        <div className="info">
-                          <div className="d-flex align-items-center w-100">
-                            <h5>
-                              <b>Leesin</b>
-                            </h5>
-                            <div className="ml-auto">
-                              <Rating
-                                name="read-only"
-                                value={5}
-                                size="small"
-                                precision={0.5}
-                                readOnly
-                              />
-                            </div>
-                          </div>
-                          <h6 className="text-light">{getTime}</h6>
-                          <p>Your will, my hands</p>
-                        </div>
-                      </div>
+                      {reviewsData?.length !== 0 &&
+                        reviewsData
+                          ?.slice(0)
+                          ?.reverse()
+                          ?.map((item, index) => {
+                            return (
+                              <div
+                                className="reviewBox mb-4 border-bottom"
+                                key={index}
+                              >
+                                <div className="info">
+                                  <div className="d-flex align-items-center w-100">
+                                    <h5>
+                                      <b>{item?.customerName}</b>
+                                    </h5>
+                                    <div className="ml-auto">
+                                      <Rating
+                                        name="read-only"
+                                        value={`${item?.customerRating}`}
+                                        size="small"
+                                        precision={0.5}
+                                        readOnly
+                                      />
+                                    </div>
+                                  </div>
+                                  <h6 className="text-light">
+                                    {moment(item?.createdAt).format(
+                                      "MM/DD/YYYY"
+                                    )}
+                                  </h6>
+                                  <p>{item?.review}</p>
+                                </div>
+                              </div>
+                            );
+                          })}
 
                       <div className="reviewBox mb-4 border-bottom">
                         <div className="info">
@@ -410,13 +516,15 @@ const ProductDetails = () => {
                       </div>
                       <br />
 
-                      <form className="reviewForm">
+                      <form className="reviewForm" onSubmit={addReview}>
                         <h4>Add a review</h4>
                         <div className="form-group">
                           <textarea
                             className="form-control shadow"
                             placeholder="Write a Review"
-                            name="revew"
+                            value={reviews.review}
+                            name="review"
+                            onChange={onChangeInput}
                           ></textarea>
                         </div>
                         <div className="row">
@@ -424,9 +532,10 @@ const ProductDetails = () => {
                             <div className="form-group">
                               <Stack spacing={1}>
                                 <Rating
-                                  name="half-rating"
-                                  defaultValue={1}
+                                  name="rating"
+                                  defaultValue={0}
                                   precision={1}
+                                  onChange={onChangeRating}
                                 />
                               </Stack>
                             </div>
@@ -434,7 +543,16 @@ const ProductDetails = () => {
                         </div>
                         <br />
                         <div className="form-group btn btn-blue btn-lg btn-big btn-round">
-                          <Button>Submit Review</Button>
+                          <Button type="submit">
+                            {isLoading === true ? (
+                              <CircularProgress
+                                color="inherit"
+                                className="loader"
+                              />
+                            ) : (
+                              "Submit Review"
+                            )}
+                          </Button>
                         </div>
                       </form>
                     </div>

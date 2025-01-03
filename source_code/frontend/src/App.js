@@ -8,11 +8,7 @@ import OrderProduct from "./components/OrderProduct/OrderProduct";
 import Signup from "./components/Signup/Signup";
 import CardDetails from "./components/ProductDetails/CardDetails";
 import "bootstrap/dist/css/bootstrap.min.css";
-import MensWatches from "./pages/Mens";
-import SportsWatch from "./pages/SportsWatch";
-import WomensWatches from "./pages/Women";
-import WallClock from "./pages/WallClock/wallClock";
-import SmartWatches from "./pages/SmartWatch/smartWatch";
+
 import { createContext, useEffect, useState } from "react";
 import { fetchDataFromAPI, postDataSign } from "./utils/api";
 import HomePage from "./pages/HomePage";
@@ -23,6 +19,7 @@ import Listing from "./pages/Listing";
 import Header from "./components/Layout/Header";
 import Footer from "./components/Layout/Footer";
 import ProductDetails from "./pages/ProductDetails";
+import WhishList from "./pages/WhishList";
 const MyContext = createContext();
 function App() {
   const [isLogin, setIsLogin] = useState(false);
@@ -102,6 +99,9 @@ function App() {
           error: false,
           open: true
         })
+        setTimeout(() => {
+          setAddingInCart(false);
+        }, 2000);
         
       getCartCount();  
       } else {
@@ -171,6 +171,7 @@ function App() {
 
           <Route path="/category/:id" element={<Listing />} />
           <Route path="/product/:id" element={<ProductDetails />} />
+          <Route path="/my-list" element={<WhishList />} />
           
         </Routes>
         {isHeaderAFooterShow === true && <Footer />}
