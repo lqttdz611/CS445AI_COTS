@@ -86,7 +86,7 @@ const Header = () => {
     fetchAllDataFromAPI(`/api/search?q=${searchField}`).then((res) => {
       context.setSearchData(res);
       setTimeout(() => {
-        setIsLoading(true);
+        setIsLoading(false);
       }, 2000);
       history("/search");
       // setSearchField("");
@@ -209,12 +209,14 @@ const Header = () => {
                 transformOrigin={{ horizontal: "left", vertical: "top" }}
                 anchorOrigin={{ horizontal: "left", vertical: "bottom" }}
               >
+                <Link to="/my-account">
                 <MenuItem onClick={handleClose}>
                   <ListItemIcon>
                     <Avatar />
                   </ListItemIcon>
                   My Account
                 </MenuItem>
+                </Link>
                 <Link to="/my-list">
                   <MenuItem onClick={handleClose}>
                     <ListItemIcon>

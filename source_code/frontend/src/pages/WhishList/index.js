@@ -2,7 +2,7 @@ import { IoMdClose } from "react-icons/io";
 import React, { useContext, useEffect } from "react";
 import Rating from "@mui/material/Rating";
 import QuantityBox from "../../components/QuantityBox";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@mui/material";
 import { IoBagCheckOutline } from "react-icons/io5";
 import { useState } from "react";
@@ -14,10 +14,18 @@ const WhishList = () => {
   const context = useContext(MyContext);
   const [listData, setListData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [isLogin, setIsLogin] = useState(false);
+  const history = useNavigate();
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if(token !== null && token !== "" && token!==undefined) {
+      setIsLogin(true);
+    } else {
+      history("/login")
+    }
     const user = JSON.parse(localStorage.getItem("user"));
 
+    
     fetchDataFromAPI(`/api/my-list?userId=${user?.userId}`).then((res) => {
       console.log("cart data + ", res);
       setListData(res);

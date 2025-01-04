@@ -19,7 +19,17 @@ import { FaEye } from "react-icons/fa";
 import { FaEdit } from "react-icons/fa";
 import { MdDeleteForever } from "react-icons/md";
 import { Link } from "react-router-dom";
+import { useContext } from "react";
+import { MyContext } from "../../App";
+import {
+  deleteData,
+  fetchAllDataFromAPI,
+  fetchDataFromAPI,
+} from "../../utils/api";
+import { useEffect } from "react";
 const Dashboard = () => {
+  const [productData, setProductData] = useState([]);
+  const context = useContext(MyContext);
   // For Button MORE (3 dots)
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -29,7 +39,28 @@ const Dashboard = () => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+  const [page, setPage] = useState(1);
+  const handleChangePagination = (event, value) => {
+    setPage(value);
+    fetchDataFromAPI(`/api/products/?page=${value}`).then((res) => {
+      if (res?.productList) {
+        setProductData(res);
+        console.log(res);
+      } else {
+        console.log("No data to show");
+      }
+    });
+  };
+  useEffect(() => {
+    window.scrollTo(0, 0);
 
+    context.setProgress(40);
+    fetchAllDataFromAPI("/api/products").then((res) => {
+      setProductData(res);
+      context.setProgress(100);
+    });
+    // console.log(productData)
+  }, []);
   // For GOOGLE CHART
   const data = [
     ["Task", "Hours per Day"],
@@ -53,6 +84,20 @@ const Dashboard = () => {
     setCategory(event.target.value);
   };
 
+  const deleteProduct = (id) => {
+    context.setProgress(40);
+    deleteData(`/api/products/${id}`).then((res) => {
+      context.setProgress(100);
+      context.setAlertBox({
+        open: true,
+        error: false,
+        msg: "Product Deleted!",
+      });
+      fetchDataFromAPI("/api/products").then((res) => {
+        setProductData(res);
+      });
+    });
+  };
   // For RATING
   return (
     <>
@@ -184,15 +229,14 @@ const Dashboard = () => {
                   <th>CATEGORY</th>
                   <th>BRAND</th>
                   <th>PRICE</th>
-                  <th>STOCK</th>
+
                   <th>RATING</th>
-                  <th>ORDER</th>
-                  <th>SALES</th>
+
                   <th>ACTION</th>
                 </tr>
               </thead>
 
-              <tbody>
+              {/* <tbody>
                 <tr>
                   <td>#1</td>
                   <td>
@@ -694,6 +738,70 @@ const Dashboard = () => {
                     </div>
                   </td>
                 </tr>
+              </tbody> */}
+              <tbody>
+                {productData?.productList?.length !== 0 &&
+                  productData?.productList?.map((item, index) => {
+                    return (
+                      <tr>
+                        <td>#{index + 1}</td>
+                        <td>
+                          <div className="d-flex align-items-center productBox">
+                            <div className="imgWrapper">
+                              <div className="img card shadow m-0">
+                                <img
+                                  src={item.images[0]}
+                                  alt="product test"
+                                  className="w-100"
+                                ></img>
+                              </div>
+                            </div>
+
+                            <div className="info pl-3">
+                              <h6>{item.name}</h6>
+                              <p>{item.description}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td>{item.category?.name} </td>
+                        <td>{item.brand}</td>
+                        <td style={{ width: "70px" }}>
+                          <del class="old">${item.price}</del>
+                          <span class="new text-danger">${item.oldPrice}</span>
+                        </td>
+                        <td>
+                          <Rating
+                            name="read-only"
+                            size="small"
+                            value={item.rating}
+                            readOnly
+                          />
+                        </td>
+
+                        <td>
+                          <div className="actions d-flex align-items-center">
+                            <Link to="/product/details">
+                              <Button className="view ">
+                                <FaEye />
+                              </Button>
+                            </Link>
+
+                            <Link to={`/product/edit/${item._id}`}>
+                              <Button className="edit ">
+                                <FaEdit />
+                              </Button>
+                            </Link>
+                            <Button
+                              className="delete"
+                              onClick={() => deleteProduct(item._id)}
+                            >
+                              <MdDeleteForever />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
 
@@ -701,9 +809,15 @@ const Dashboard = () => {
               <p>
                 Showing <b>10</b> of <b>60</b> results
               </p>
-              
-                <Pagination className="pagination " count={10} showFirstButton showLastButton />
-              
+
+              <Pagination
+                count={productData?.totalPages}
+                color="primary"
+                className="pagination "
+                showFirstButton
+                showLastButton
+                onChange={handleChangePagination}
+              />
             </div>
           </div>
         </div>

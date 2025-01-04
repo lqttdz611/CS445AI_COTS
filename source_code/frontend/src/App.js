@@ -23,6 +23,7 @@ import WhishList from "./pages/WhishList";
 import CheckoutSuccess from "./pages/Checkout/success";
 import Orders from "./pages/Orders";
 import SearchPage from "./pages/Search";
+import MyAccount from "./pages/MyAccount";
 const MyContext = createContext();
 function App() {
   const [isLogin, setIsLogin] = useState(false);
@@ -53,7 +54,7 @@ function App() {
   });
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token !== null && token !== "") {
+    if (token !== null && token !== "" && token!==undefined) {
       setIsLogin(true);
       const userData = JSON.parse(localStorage.getItem("user"));
       setUser(userData);
@@ -180,6 +181,7 @@ function App() {
           <Route path="/my-list" element={<WhishList />} />
           <Route path="/my-order" element={<Orders />} />
           <Route path="/search" element={<SearchPage />} />
+          <Route path="/my-account" element={<MyAccount />} />
           <Route path="/checkout-success" exact={true} element={<CheckoutSuccess />}></Route>
           
         </Routes>
