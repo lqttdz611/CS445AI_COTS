@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { FaMicrophone, FaShoppingBag } from "react-icons/fa";
 import { navItems, productData } from "../../static/data";
 import { MyContext } from "../../App";
-import { fetchDataFromAPI } from "../../utils/api";
+import { fetchAllDataFromAPI, fetchDataFromAPI } from "../../utils/api";
 import { FaRegUser } from "react-icons/fa";
 import { Button } from "@mui/material";
 import Avatar from "@mui/material/Avatar";
@@ -18,8 +18,14 @@ import { FaCartArrowDown } from "react-icons/fa6";
 import Settings from "@mui/icons-material/Settings";
 import { useNavigate } from "react-router-dom";
 import Logout from "@mui/icons-material/Logout";
+
+import CircularProgress from "@mui/material/CircularProgress";
+
+
 const Header = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const history = useNavigate();
+  const context = useContext(MyContext);
 
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
@@ -45,7 +51,6 @@ const Header = () => {
       history("/sign-in");
     }, 2000);
   };
-  const context = useContext(MyContext);
   const [isScrolled, setIsScrolled] = useState(false);
   const [categoryData, setCategoryData] = useState([]);
   useEffect(() => {
@@ -71,6 +76,22 @@ const Header = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const [searchField, setSearchField] = useState("");
+  const onChangeValue = (e) => {
+    setSearchField(e.target.value)
+  }
+  
+  const searchProducts =() => {
+    setIsLoading(true);
+    fetchAllDataFromAPI(`/api/search?q=${searchField}`).then((res) => {
+      context.setSearchData(res);
+      setTimeout(() => {
+        setIsLoading(true);
+      }, 2000);
+      history("/search");
+      // setSearchField("");
+    })
+  }
   return (
     <>
       <div>
@@ -81,9 +102,13 @@ const Header = () => {
               type="text"
               placeholder="Tìm sản phẩm hoặc thương hiệu ..."
               className="h-[40px] w-full pl-10 pr-10 border-[2px] rounded-md border-[#3957db]"
+              onChange={onChangeValue}
             />
-            <button className="absolute left-2 top-1/2 transform -translate-y-1/2">
-              <AiOutlineSearch size={20} />
+            <button className="absolute left-2 top-1/2 transform -translate-y-1/2" onClick={searchProducts}>
+            {
+              isLoading===true ? <CircularProgress size="30px"/> :<AiOutlineSearch size={20} />
+            }
+              
             </button>
             <FaMicrophone
               size={30}

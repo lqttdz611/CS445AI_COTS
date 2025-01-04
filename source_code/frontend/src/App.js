@@ -22,12 +22,14 @@ import ProductDetails from "./pages/ProductDetails";
 import WhishList from "./pages/WhishList";
 import CheckoutSuccess from "./pages/Checkout/success";
 import Orders from "./pages/Orders";
+import SearchPage from "./pages/Search";
 const MyContext = createContext();
 function App() {
   const [isLogin, setIsLogin] = useState(false);
   const [productData, setProductData] = useState([]);
   const [categoryData, setCategoryData] = useState([]);
   const [brandData, setBrandData] = useState([]);
+  const [searchData, setSearchData] = useState([]);
   const [cartCount, setCartCount] = useState();
   const [addingInCart, setAddingInCart] = useState(false)
   const [alertBox, setAlertBox] = useState({
@@ -140,7 +142,9 @@ function App() {
     setCartCount,
     getCartCount,
     addingInCart,
-    setAddingInCart
+    setAddingInCart,
+    searchData,
+    setSearchData,
   };
   return (
     <BrowserRouter>
@@ -175,6 +179,7 @@ function App() {
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/my-list" element={<WhishList />} />
           <Route path="/my-order" element={<Orders />} />
+          <Route path="/search" element={<SearchPage />} />
           <Route path="/checkout-success" exact={true} element={<CheckoutSuccess />}></Route>
           
         </Routes>

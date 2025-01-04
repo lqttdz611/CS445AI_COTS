@@ -23,6 +23,7 @@ const productReviewsRouter  = require('./routes/productReviews');
 const cartRoutes = require('./routes/cart');
 const ordersRoutes = require('./routes/orders');
 const whishListRoutes = require('./routes/whishList');
+const searchRoutes = require('./routes/search');
 // stripe
 const stripeRoutes = require('./routes/stripe');
 
@@ -37,6 +38,7 @@ app.use(`/api/cart`, cartRoutes);
 app.use(`/api/my-list`, whishListRoutes);
 app.use(`/api/orders`, ordersRoutes)
 app.use(`/api/stripe`, stripeRoutes)
+app.use(`/api/search`, searchRoutes);
 
 // Database
 mongoose.connect(process.env.CONNECTION_STRING, {
