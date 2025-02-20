@@ -11,6 +11,7 @@ const Orders = () => {
   const [ordersData, setOrdersData] = useState([]);
   const user = JSON.parse(localStorage.getItem("user"));
   useEffect(() => {
+    console.log(user?.userId);
     window.scrollTo(0, 0);
     fetchDataFromAPI(`/api/orders?userId=${user?.userId}`).then((res) => {
       setOrdersData(res);
